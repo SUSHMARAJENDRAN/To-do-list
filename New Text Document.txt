@@ -1,0 +1,80 @@
+"User Story 
+AI‑Assisted Flexible Work & Life Balance Request System 
+As a woman employee, I want to request flexible work arrangements—such as working from home, 
+shift changes, and caregiving support—with the assistance of AI. The AI should help me structure 
+my request, track approval status, and monitor outcomes to ensure that work-life balance is 
+promoted fairly and consistently across the organization. 
+Expanded Details 
+• Request Initiation: Employees can submit requests for flexible work arrangements through 
+an intuitive interface. The AI guides users to specify their needs (e.g., WFH, shift changes, 
+caregiving support) and captures relevant context such as timing, urgency, and supporting 
+information. 
+• AI-Generated Justification: The AI analyzes the employee’s informal reasoning, converting 
+it into a professionally formatted justification. It suggests relevant request categories and 
+references applicable company policies, ensuring the submission aligns with organizational 
+guidelines. 
+• Approval Workflow: Requests are routed automatically to designated approvers based on 
+organizational hierarchy and type of request.  
+• Policy Tagging: Each request is tagged with relevant company policies and procedures, 
+helping both employees and managers understand the criteria for approval and ensuring 
+compliance. 
+• Outcome Monitoring: The system tracks outcomes of approved or denied requests, 
+enabling employees to receive feedback and suggestions for future submissions. The AI 
+provides analytics on the effectiveness of flexible arrangements and their impact on work
+life balance. 
+Functional Scope 
+• Request Intake: Guided submission process for flexible work arrangements. 
+• AI-Generated Justification: Intelligent conversion of informal reasoning to professional 
+requests. 
+• Approval Workflow: Automated routing, tracking, and follow-up of requests. 
+• Policy Tagging: Linking requests to company policies for clarity and compliance. 
+• Outcome Monitoring: Feedback and analytics on request outcomes. 
+• Reporting dashboard 
+TCS Internal        
+11 March 2026 
+AI for IT – SDLC 
+Deliverables 
+All the deliverables are expected to be of production-level quality, 
+comprehensive and ensuring excellence in both content and look & 
+feel. 
+1. Functional requirements document 
+2. Application Architecture and Architecture document 
+3. Database design / Data Models – No JSON input of data, use any RDBMS, deliverables 
+include logical model, physical model and ER diagram 
+4. UI/Ux/Wireframe Design  
+5. Software code & Working Software 
+6. Functional Test scripts in a CSV or Excel  
+7. Traceability Matrix in CSV or Excel 
+8. End User manual - Screens and help guide 
+9. AI Agent – “Code Quality Checker” built with an AI framework and Streamlit or Gradio; 
+takes code and checklist as input and provide observations against each checklist item 
+and suggestions for improvements if any 
+Instructions 
+Use AI tools or Build Your Own AI Agents (BYOAA) to develop the 
+software and deliverables. 
+• Selection of Tools: Carefully evaluate and select the most suitable AI tools or frameworks 
+for each phase of the project. If building custom AI agents, ensure they are scalable, 
+maintainable. Additional weightage will be given if team builds their own AI agent to create 
+the deliverables. 
+• Quality Standards: Adhere strictly to coding standards and best practices for software 
+development. Apply consistent design patterns, code reviews, and automated testing to 
+maintain high quality. 
+• Integration: Ensure seamless integration of components with the overall application 
+architecture. 
+• Testing: Prepare comprehensive test cases, including both functional and non-functional 
+scenarios.  
+TCS Internal        
+11 March 2026 
+AI for IT – SDLC 
+• Documentation: Maintain clear and detailed documentation for all deliverables, including 
+architecture diagrams, data models, and user manuals. Update documents regularly as 
+changes are made. 
+• User Experience: Prioritise a user-centric approach in UI/UX design. Avoid using Streamlit 
+or Gradio for the user interface." give me a perfect prompt to  acchieve this front end use react backend fast api . and AI assitent use the best one like langchain , langgraph, rag , which one is best how to use use that . and  also sussgest me a best model to achive this with low token and low cost also use grauddrain . the assistant i want more professional gilr anime . that anime i want like girl IT employee with all hme pain with one crown . . this should nbe my assistant , bot image and i want it more gradient and profesional ui . when i launch my application after login the anime should come and speek , like i am your assistant tell me what can i do for your , before that tell something kind are plesant word like if its a morning i want hi divya good mordring , I happy to assist you , also the bot i want with more action like how human will speek like that it shoud do action . also the tracting iwant more interactionalso i want when opening the application guide like application tour i want . and also in  assisyant when i ask help me to raise ticket it should  ask the concenrn and raise also do authentication and authorization  more security and secure db also the application i want be standard and professional and meaning full name also i wnat log file there the log should come both front end and back end use  i want notifaction enabling the notication should come when register the ticket, using smtp the mail should come so use  , divss.techie@gmail.com, drmad2525@gmail.com, divieee2022@gmail., diviias25@gmail.com . these are my active also once register it will go to superviser . so  if one employee raised it should go to our taged superviser and taged hr is superviser approverd then it will go Hr for if one request raised for mail should come employee , the superviser also mail should go then superviser approved mail triger to Hr also need turnoround days . once request raised it will automatically close within 7 days also set remainder to superviser or manager and HR . . give me a perfect and professional application. UI is my main concern it should more , unique and coulor also and my applixation also suppurt to blind people . when the move curser it shoud tell and wen i clik douple tap y assitant will come . . use best one best package to achve this. dont miss anything in my use case also do best architectire for agent . I have to show my agent . all should appriceate . my agent and low usage of llm token and perfect prompt. . give em a ad good and professional name for my application it should more case  and unique trendy . also this application is women based so in this application the assiatnt should give and support when she is sad recognizeher face and tell me so tipes and also set session mangemnet if use not logged out more than 10 min it shouldautomatically logg off. 
+
+give me a perfect propt  and my bot name is kira . and use
+
+
+LLM_API_KEY=sk-T4AaQhdHdumu_fBjjE5nyg
+LLM_BASE_URL=https://genailab.tcs.in
+LLM_MODEL=azure_ai/genailab-maas-DeepSeek-R1

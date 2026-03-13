@@ -1,0 +1,88 @@
+============================================================
+          HACKATHON USER GUIDE – LLM TESTING
+============================================================
+
+1. OVERVIEW
+------------------------------------------------------------
+This guide explains how to test the LLM and initialize embeddings 
+during the hackathon.
+
+Everything you need is already in the folder:
+
+    Y:\Hackathon\Chennai\Do not delete\
+
+Contents:
+    • testing.py    – Python script to test chat and initialize embeddings
+
+---
+
+2. USING testing.py
+------------------------------------------------------------
+The testing.py file does the following:
+
+    • Tests the model with a simple prompt
+    • Initializes the embedding model (you can use it for RAG purpose)
+
+---
+
+3. INSTRUCTIONS
+------------------------------------------------------------
+1. Go to the folder:
+
+       Do not delete\
+
+2. Copy ONLY testing.py to your local machine.
+
+3. Open testing.py and replace the placeholders with your TEAM API KEY
+   located at:
+
+       Y:\Hackathon\Chennai\Siruseri\{team_number}\key.txt
+
+4. Run the file in LOCAL(C:):
+
+       python testing.py
+
+   • You will see the LLM response printed.
+   • Embeddings are initialized and ready for future RAG usage.
+   • Full RAG is not included to avoid SSL certificate errors.
+      Reference: https://stackoverflow.com/questions/76106366/how-to-use-tiktoken-in-offline-mode-computer
+
+5. If you encounter any errors while running npm install or any other npm commands, please try running the following command and then retry:
+
+	npm set strict-ssl false
+
+---
+
+4. GENAILAB API PORTAL
+------------------------------------------------------------
+The LLM models are hosted at the Swagger portal:
+
+    https://genailab.tcs.in
+
+You can:
+
+    • Authenticate using your team API key
+    • Explore the models endpoints
+    • See the list of models you can access (23 models in total):
+        - Text models
+        - Audio models
+        - Embedding models
+
+This is useful if you want to test other models beyond the defaults 
+provided in testing.py.
+
+---
+
+⚠️ Do NOT delete or Edit the "Do not delete" folder. It contains all required files.
+
+---
+
+5. SUMMARY
+------------------------------------------------------------
+• Copy testing.py to your local machine.
+• Replace your API key.
+• Run the script to test chat and initialize embeddings.
+• Visit https://genailab.tcs.in to explore models and endpoints.
+• Use Aider for interactive coding support.
+
+============================================================
