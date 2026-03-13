@@ -1,0 +1,2469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aura-Mira — Voice-First Women's Wellbeing & WFH System</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+:root {
+  --bg:#07090f;--s1:#0d1117;--s2:#161b25;--s3:#1c2333;
+  --b:rgba(88,166,255,0.1);--b2:rgba(88,166,255,0.18);
+  --a:#58a6ff;--a2:#f78166;--a3:#3fb950;--a4:#d2a8ff;--a5:#ffa657;
+  --pink:#ff7eb6;--t:#e6edf3;--t2:#8b949e;--t3:#484f58;
+  --glow:0 0 40px rgba(88,166,255,0.08);
+  --ff:'Syne',sans-serif;--fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--fb);background:var(--bg);color:var(--t);min-height:100vh;overflow-x:hidden}
+::selection{background:rgba(88,166,255,0.3)}
+
+/* BG */
+.bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(88,166,255,0.04),transparent),
+             radial-gradient(ellipse 60% 40% at 80% 80%,rgba(210,168,255,0.04),transparent),
+             radial-gradient(ellipse 40% 60% at 50% 50%,rgba(63,185,80,0.02),transparent)}
+.scanline{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px)}
+
+/* PAGES */
+.page{display:none;min-height:100vh;position:relative;z-index:1}
+.page.active{display:flex}
+
+/* ═══ VOICE LOGIN PAGE ═══ */
+#pg-login{flex-direction:column;align-items:center;justify-content:center;gap:0}
+.login-wrap{width:100%;max-width:520px;padding:24px}
+
+.voice-login-hero{text-align:center;margin-bottom:36px}
+.brand{font-family:var(--ff);font-size:38px;font-weight:800;
+  background:linear-gradient(135deg,var(--a),var(--a4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.brand-sub{color:var(--t2);font-size:13px;letter-spacing:0.12em;text-transform:uppercase;margin-top:6px}
+
+/* BIG VOICE ORB */
+.voice-orb-wrap{display:flex;flex-direction:column;align-items:center;margin:28px 0}
+.v-orb{
+  width:110px;height:110px;border-radius:50%;
+  background:linear-gradient(135deg,var(--s2),var(--s3));
+  border:2px solid var(--b2);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;transition:all .3s;
+  box-shadow:0 0 0 0 rgba(88,166,255,0);
+}
+.v-orb .orb-icon{font-size:40px;transition:all .3s;z-index:2;position:relative}
+.v-orb::before{
+  content:'';position:absolute;inset:-8px;border-radius:50%;
+  border:1px solid rgba(88,166,255,0.15);animation:orbRing 3s linear infinite;
+}
+.v-orb::after{
+  content:'';position:absolute;inset:-18px;border-radius:50%;
+  border:1px solid rgba(88,166,255,0.07);animation:orbRing 3s linear infinite reverse;animation-delay:-1.5s;
+}
+@keyframes orbRing{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.v-orb.listening{
+  background:linear-gradient(135deg,#1a2a4a,#0d1f3c);
+  border-color:var(--a);
+  box-shadow:0 0 0 20px rgba(88,166,255,0.08),0 0 60px rgba(88,166,255,0.2);
+  animation:listenPulse 1.2s ease-in-out infinite;
+}
+@keyframes listenPulse{0%,100%{box-shadow:0 0 0 0 rgba(88,166,255,0.3),0 0 40px rgba(88,166,255,0.1)}
+  50%{box-shadow:0 0 0 24px rgba(88,166,255,0),0 0 80px rgba(88,166,255,0.25)}}
+.v-orb.processing{animation:spin 1s linear infinite;border-color:var(--a4)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.v-orb.speaking{border-color:var(--a3);animation:speakWave 0.6s ease-in-out infinite}
+@keyframes speakWave{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+
+/* WAVEFORM */
+.waveform{display:flex;align-items:center;gap:3px;height:36px;margin:8px 0}
+.wave-bar{
+  width:4px;border-radius:99px;background:var(--a);opacity:0.3;
+  animation:waveAnim 1s ease-in-out infinite;
+  transform-origin:center;
+}
+.wave-bar.active{opacity:1}
+@keyframes waveAnim{0%,100%{height:6px}50%{height:28px}}
+
+.orb-status{font-size:14px;color:var(--t2);margin-top:8px;text-align:center;min-height:20px;transition:all .3s}
+
+/* TRANSCRIPT BOX */
+.transcript-box{
+  background:var(--s1);border:1px solid var(--b);border-radius:14px;
+  padding:16px 18px;min-height:60px;font-family:var(--fm);font-size:14px;
+  color:var(--a);margin-bottom:12px;position:relative;transition:all .3s;
+}
+.transcript-box.has-text{border-color:var(--a);background:rgba(88,166,255,0.04)}
+.transcript-placeholder{color:var(--t3);font-family:var(--fb);font-style:italic;font-size:13px}
+
+.ai-reply{
+  background:rgba(63,185,80,0.06);border:1px solid rgba(63,185,80,0.18);
+  border-radius:14px;padding:14px 18px;font-size:14px;color:var(--a3);
+  margin-bottom:16px;display:none;line-height:1.6;
+}
+.ai-reply.show{display:block;animation:fadeSlide .3s ease}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* QUICK COMMANDS */
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.qcmd{
+  padding:10px 14px;background:var(--s1);border:1px solid var(--b);border-radius:10px;
+  font-size:12px;color:var(--t2);cursor:pointer;transition:all .2s;text-align:left;
+  display:flex;align-items:center;gap:8px;
+}
+.qcmd:hover{background:rgba(88,166,255,0.08);border-color:var(--a);color:var(--t)}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--t3);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--b)}
+
+/* MANUAL LOGIN */
+.manual-form{background:var(--s1);border:1px solid var(--b);border-radius:14px;padding:20px;margin-bottom:16px}
+.mf-title{font-size:13px;font-weight:600;color:var(--t2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.mf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.mf-inp{width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--b);border-radius:10px;
+  color:var(--t);font-family:var(--fb);font-size:13px;outline:none;transition:all .2s}
+.mf-inp:focus{border-color:var(--a);background:rgba(88,166,255,0.05)}
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,var(--a),#4c9eff);border:none;border-radius:10px;
+  color:#fff;font-family:var(--fb);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:4px}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(88,166,255,0.3)}
+
+/* DEMO PILLS */
+.demo-pills{display:flex;flex-wrap:wrap;gap:8px}
+.dpill{
+  padding:7px 14px;background:var(--s2);border:1px solid var(--b);border-radius:20px;
+  font-size:12px;color:var(--t2);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;
+}
+.dpill:hover{border-color:var(--a);color:var(--a)}
+.dpill-role{font-size:10px;padding:1px 6px;border-radius:20px;font-weight:600}
+.r-emp{background:rgba(63,185,80,0.15);color:var(--a3)}
+.r-hr{background:rgba(210,168,255,0.15);color:var(--a4)}
+.r-adm{background:rgba(255,166,87,0.15);color:var(--a5)}
+
+/* ═══ MAIN APP ═══ */
+#pg-app{flex-direction:row}
+
+/* SIDEBAR */
+.sidebar{
+  width:252px;min-height:100vh;background:var(--s1);
+  border-right:1px solid var(--b);display:flex;flex-direction:column;
+  padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;
+}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:0 18px 20px;border-bottom:1px solid var(--b);margin-bottom:16px}
+.sb-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--a),var(--a4));border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-title{font-family:var(--ff);font-size:18px;font-weight:700}
+
+.sb-sec{padding:0 12px;margin-bottom:6px}
+.sb-sec-lbl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.1em;padding:0 6px;margin-bottom:4px}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  color:var(--t2);font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;margin-bottom:1px}
+.nav:hover{background:rgba(88,166,255,0.07);color:var(--t)}
+.nav.on{background:rgba(88,166,255,0.12);color:var(--a);border:1px solid rgba(88,166,255,0.2)}
+.nav .ni{width:20px;text-align:center;font-size:16px}
+.nav .nb{margin-left:auto;font-size:10px;padding:2px 7px;background:var(--a);color:#fff;border-radius:20px;font-weight:700}
+
+.sb-voice-mini{margin:auto 12px 0;border-top:1px solid var(--b);padding-top:16px}
+.voice-mini-btn{
+  width:100%;padding:12px;background:linear-gradient(135deg,rgba(88,166,255,0.1),rgba(210,168,255,0.06));
+  border:1px solid var(--b2);border-radius:12px;color:var(--a);font-family:var(--fb);font-size:13px;
+  font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;justify-content:center;
+}
+.voice-mini-btn:hover{background:rgba(88,166,255,0.15);border-color:var(--a)}
+.voice-mini-btn.on{background:rgba(247,129,102,0.1);border-color:var(--a2);color:var(--a2);animation:pulseBorder 1s ease-in-out infinite}
+@keyframes pulseBorder{0%,100%{box-shadow:0 0 0 0 rgba(247,129,102,0.3)}50%{box-shadow:0 0 0 6px rgba(247,129,102,0)}}
+
+.sb-user{padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:12px;margin:10px 12px 0;
+  display:flex;align-items:center;gap:10px}
+.sb-avatar{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--a),var(--a4));
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0}
+.sb-uname{font-size:13px;font-weight:600;line-height:1.2}
+.sb-urole{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.06em}
+.sb-logout{margin-left:auto;background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px;padding:4px;border-radius:6px;transition:color .2s}
+.sb-logout:hover{color:var(--a2)}
+
+/* MAIN */
+.main{flex:1;padding:28px 32px;overflow-y:auto;height:100vh}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+.pt{font-family:var(--ff);font-size:28px;font-weight:700}
+.ps{color:var(--t2);font-size:13px;margin-top:3px}
+
+/* SECTION */
+.sec{display:none}.sec.on{display:block}
+
+/* STATS */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.scard{
+  background:var(--s1);border:1px solid var(--b);border-radius:14px;padding:20px;
+  position:relative;overflow:hidden;transition:all .2s;
+}
+.scard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ca,var(--a))}
+.scard:hover{border-color:var(--b2);transform:translateY(-2px)}
+.sc-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:10px}
+.sc-val{font-family:var(--ff);font-size:34px;font-weight:700}
+.sc-sub{font-size:12px;color:var(--t2);margin-top:3px}
+.sc-icon{position:absolute;top:16px;right:16px;font-size:26px;opacity:0.12}
+
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--b);border-radius:14px;padding:24px;margin-bottom:18px}
+.ct{font-size:15px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);
+  padding:9px 14px;border-bottom:1px solid var(--b);text-align:left;background:rgba(255,255,255,.015)}
+tbody td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+tbody tr:last-child td{border-bottom:none}
+
+/* BADGE */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.ba{background:rgba(63,185,80,.15);color:var(--a3)}
+.bp{background:rgba(255,166,87,.15);color:var(--a5)}
+.br{background:rgba(247,129,102,.15);color:var(--a2)}
+.bc{background:rgba(88,166,255,.15);color:var(--a)}
+.bw{background:rgba(210,168,255,.15);color:var(--a4)}
+
+/* FORM */
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+.fg input,.fg select,.fg textarea{
+  width:100%;padding:12px 14px;background:var(--s2);border:1px solid var(--b);
+  border-radius:10px;color:var(--t);font-family:var(--fb);font-size:13px;outline:none;transition:all .2s;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--a);background:rgba(88,166,255,.05)}
+.fg select option{background:var(--s2)}
+.fg textarea{resize:vertical}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.full{grid-column:1/-1}
+.btn-row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.btn{padding:11px 22px;border-radius:9px;font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:none}
+.btn-g{background:linear-gradient(135deg,var(--a3),#2ea043);color:#0a1f0f;box-shadow:0 4px 14px rgba(63,185,80,.2)}
+.btn-g:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(63,185,80,.3)}
+.btn-o{background:none;border:1px solid var(--b);color:var(--t2)}
+.btn-o:hover{border-color:var(--a);color:var(--a)}
+.btn-r{background:linear-gradient(135deg,var(--a2),#cf4e37);color:#fff}
+.btn-p{background:linear-gradient(135deg,var(--a),#4c9eff);color:#fff;box-shadow:0 4px 14px rgba(88,166,255,.2)}
+
+/* PROGRESS */
+.pb{background:rgba(255,255,255,.06);border-radius:99px;height:6px;overflow:hidden;margin-top:6px}
+.pf{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--a),var(--a4));transition:width .5s}
+
+/* POLICY CARDS */
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.pcard{background:var(--s2);border:1px solid var(--b);border-radius:13px;padding:20px;
+  position:relative;overflow:hidden;transition:all .2s}
+.pcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pc,var(--a))}
+.pcard:hover{border-color:var(--b2);transform:translateY(-1px)}
+.pn{font-size:14px;font-weight:600;margin-bottom:4px}
+.pt2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:10px}
+.pd{font-size:12px;color:var(--t2);line-height:1.6}
+.pdays{font-family:var(--ff);font-size:28px;font-weight:700}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.chip{padding:3px 10px;border-radius:20px;font-size:11px;background:rgba(88,166,255,.08);color:var(--a);border:1px solid rgba(88,166,255,.15)}
+
+/* MODAL */
+.moverlay{display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.75);
+  backdrop-filter:blur(4px);align-items:center;justify-content:center}
+.moverlay.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b);border-radius:18px;padding:32px;
+  width:500px;max-width:95vw;max-height:85vh;overflow-y:auto;animation:fadeSlide .3s ease;
+  box-shadow:0 40px 80px rgba(0,0,0,.6)}
+.modal-title{font-family:var(--ff);font-size:20px;font-weight:700;margin-bottom:20px}
+
+/* ═══ BIG VOICE PANEL (in app) ═══ */
+.voice-panel-app{
+  background:linear-gradient(135deg,var(--s1),var(--s2));
+  border:1px solid var(--b2);border-radius:16px;padding:24px;margin-bottom:22px;
+  position:relative;overflow:hidden;
+}
+.voice-panel-app::before{
+  content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;
+  border-radius:50%;background:radial-gradient(circle,rgba(88,166,255,.08),transparent);
+  pointer-events:none;
+}
+
+/* CONV BUBBLES */
+.bubble{padding:12px 16px;border-radius:12px;margin-bottom:8px;font-size:13px;line-height:1.6;max-width:90%}
+.bubble-user{background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.15);color:var(--t);align-self:flex-end;margin-left:auto}
+.bubble-ai{background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.15);color:var(--a3)}
+.bubble-sys{background:rgba(255,166,87,.07);border:1px solid rgba(255,166,87,.15);color:var(--a5);font-size:12px}
+.conv-wrap{display:flex;flex-direction:column;max-height:320px;overflow-y:auto;gap:6px;padding:4px}
+
+/* DB VIEWER */
+.db-info-box{
+  background:var(--s1);border:1px solid rgba(63,185,80,.2);border-radius:12px;
+  padding:16px;font-family:var(--fm);font-size:12px;color:var(--a3);line-height:2;margin-bottom:18px;
+}
+.db-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.db-tab{padding:7px 16px;background:var(--s2);border:1px solid var(--b);border-radius:8px;
+  font-size:12px;color:var(--t2);cursor:pointer;transition:all .2s;font-family:var(--fm)}
+.db-tab.on{background:rgba(63,185,80,.1);border-color:var(--a3);color:var(--a3)}
+.db-rec-count{font-size:11px;color:var(--t3);margin-bottom:10px;font-family:var(--fm)}
+.db-sql{background:var(--s2);border:1px solid var(--b);border-radius:10px;padding:14px;
+  font-family:var(--fm);font-size:12px;color:var(--a4);margin-bottom:14px;line-height:1.8}
+
+/* TOAST */
+#toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  padding:13px 20px;border-radius:12px;background:var(--s1);border:1px solid var(--b);
+  box-shadow:0 8px 32px rgba(0,0,0,.5);font-size:13px;
+  transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  display:flex;align-items:center;gap:10px;max-width:360px;
+}
+#toast.show{transform:translateY(0);opacity:1}
+
+/* WELCOME */
+.wbanner{
+  background:linear-gradient(135deg,rgba(14,30,57,.8),rgba(22,27,37,.8));
+  border:1px solid rgba(88,166,255,.15);border-radius:14px;padding:22px 26px;margin-bottom:20px;
+  display:flex;align-items:center;justify-content:space-between;overflow:hidden;position:relative;
+}
+.wbanner::after{content:'🏠';position:absolute;right:100px;top:50%;transform:translateY(-50%);font-size:70px;opacity:.05}
+
+/* BAL ITEM */
+.bi{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--b)}
+.bi:last-child{border-bottom:none}
+.bi-l{font-size:13px}
+.bi-r{font-family:var(--fm);font-size:13px;color:var(--a3)}
+.bi-r.low{color:var(--a2)}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(88,166,255,.15);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:rgba(88,166,255,.3)}
+
+/* Responsive */
+@media(max-width:900px){.sgrid{grid-template-columns:repeat(2,1fr)}.pgrid{grid-template-columns:1fr}.fgrid{grid-template-columns:1fr}}
+
+/* ══════════════════════════════════════
+   AI LEAVE ADVISOR MODULE
+   ══════════════════════════════════════ */
+
+/* Animated gradient border on the advisor card */
+.advisor-hero {
+  position:relative;border-radius:18px;padding:2px;
+  background:linear-gradient(135deg,#58a6ff,#d2a8ff,#3fb950,#ffa657);
+  background-size:300% 300%;animation:gradShift 6s ease infinite;margin-bottom:22px;
+}
+@keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.advisor-hero-inner{
+  background:var(--s1);border-radius:16px;padding:28px 30px;
+  display:flex;align-items:center;gap:20px;
+}
+.advisor-brain{
+  width:64px;height:64px;border-radius:16px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(88,166,255,.15),rgba(210,168,255,.15));
+  border:1px solid rgba(88,166,255,.25);
+  display:flex;align-items:center;justify-content:center;font-size:32px;
+  animation:brainPulse 3s ease-in-out infinite;
+}
+@keyframes brainPulse{0%,100%{box-shadow:0 0 0 0 rgba(88,166,255,.2)}50%{box-shadow:0 0 0 12px rgba(88,166,255,.0)}}
+
+/* Reason input area */
+.adv-reason-wrap{
+  background:var(--s2);border:1.5px solid var(--b);border-radius:14px;padding:20px;margin-bottom:18px;transition:border-color .25s;
+}
+.adv-reason-wrap:focus-within{border-color:rgba(88,166,255,.4);}
+.adv-reason-label{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.adv-reason-inp{
+  width:100%;min-height:90px;background:transparent;border:none;outline:none;
+  color:var(--t);font-family:var(--fb);font-size:14px;line-height:1.7;resize:vertical;
+}
+.adv-reason-inp::placeholder{color:var(--t3);font-style:italic;}
+
+/* Chips row for example prompts */
+.adv-examples{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px;}
+.adv-ex{
+  padding:5px 13px;border-radius:20px;font-size:11px;cursor:pointer;transition:all .18s;
+  background:rgba(88,166,255,.07);border:1px solid rgba(88,166,255,.15);color:var(--t2);
+}
+.adv-ex:hover{background:rgba(88,166,255,.15);color:var(--a);border-color:rgba(88,166,255,.3);}
+
+/* Analyze button */
+.adv-btn{
+  width:100%;padding:14px;border:none;border-radius:12px;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:10px;
+  background:linear-gradient(135deg,var(--a),#7b42ff);color:#fff;
+  box-shadow:0 4px 20px rgba(88,166,255,.25);
+}
+.adv-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(88,166,255,.35);}
+.adv-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* Thinking animation */
+.adv-thinking{
+  display:none;padding:20px;text-align:center;
+  background:rgba(88,166,255,.04);border:1px solid rgba(88,166,255,.12);border-radius:14px;margin-bottom:18px;
+}
+.adv-thinking.show{display:block;}
+.adv-dots{display:inline-flex;gap:6px;margin-top:8px;}
+.adv-dot{width:8px;height:8px;border-radius:50%;background:var(--a);animation:dotBounce 1.2s ease-in-out infinite;}
+.adv-dot:nth-child(2){animation-delay:.2s;}
+.adv-dot:nth-child(3){animation-delay:.4s;}
+@keyframes dotBounce{0%,100%{transform:translateY(0);opacity:.3}50%{transform:translateY(-8px);opacity:1}}
+
+/* Suggestion cards container */
+.adv-results{display:none;animation:fadeSlide .4s ease;}
+.adv-results.show{display:block;}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Individual suggestion card */
+.adv-card{
+  background:var(--s2);border:1px solid var(--b);border-radius:14px;
+  margin-bottom:14px;overflow:hidden;transition:all .2s;position:relative;
+}
+.adv-card:hover{border-color:var(--b2);transform:translateY(-1px);}
+.adv-card-accent{height:3px;width:100%;}
+.adv-card-body{padding:18px 20px;}
+.adv-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.adv-card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.adv-card-badge{
+  font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.07em;flex-shrink:0;
+}
+.badge-best{background:rgba(63,185,80,.15);color:var(--a3);border:1px solid rgba(63,185,80,.3);}
+.badge-alt{background:rgba(88,166,255,.1);color:var(--a);border:1px solid rgba(88,166,255,.2);}
+.badge-low{background:rgba(255,166,87,.1);color:var(--a5);border:1px solid rgba(255,166,87,.25);}
+.badge-na{background:rgba(247,129,102,.08);color:var(--a2);border:1px solid rgba(247,129,102,.2);}
+
+.adv-card-reason{font-size:13px;color:var(--t2);line-height:1.65;margin-bottom:14px;}
+.adv-bal-row{
+  display:flex;align-items:center;gap:8px;font-size:12px;
+  background:rgba(255,255,255,.03);border-radius:8px;padding:8px 12px;margin-bottom:12px;
+}
+.adv-bal-val{font-family:var(--fm);color:var(--a3);font-weight:600;}
+.adv-bal-val.low{color:var(--a5);}
+.adv-bal-val.zero{color:var(--a2);}
+.adv-conditions{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;}
+.adv-cond{font-size:10px;padding:2px 9px;border-radius:20px;background:rgba(255,255,255,.04);color:var(--t3);border:1px solid rgba(255,255,255,.07);}
+
+.adv-apply-btn{
+  width:100%;padding:11px;border:none;border-radius:10px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.adv-apply-btn.go{background:linear-gradient(135deg,var(--a3),#2ea043);color:#0a1f0f;box-shadow:0 4px 12px rgba(63,185,80,.2);}
+.adv-apply-btn.go:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(63,185,80,.3);}
+.adv-apply-btn.disabled{background:rgba(255,255,255,.04);color:var(--t3);cursor:not-allowed;border:1px solid var(--b);}
+
+/* Summary insight box */
+.adv-insight{
+  background:linear-gradient(135deg,rgba(88,166,255,.07),rgba(210,168,255,.05));
+  border:1px solid rgba(88,166,255,.18);border-radius:14px;padding:18px 20px;margin-bottom:20px;
+}
+.adv-insight-title{font-size:12px;font-weight:700;color:var(--a);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.adv-insight-text{font-size:13px;color:var(--t2);line-height:1.7;}
+.adv-insight-text strong{color:var(--t);}
+
+/* History of past queries */
+.adv-history-item{
+  padding:12px 14px;background:var(--s2);border:1px solid var(--b);border-radius:10px;
+  margin-bottom:8px;cursor:pointer;transition:all .2s;font-size:12px;
+}
+.adv-history-item:hover{border-color:var(--a);background:rgba(88,166,255,.05);}
+.adv-history-reason{color:var(--t);margin-bottom:3px;font-weight:500;}
+.adv-history-meta{color:var(--t3);font-size:11px;}
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+<div class="scanline"></div>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="pg-login" class="page active">
+  <div class="login-wrap">
+    <div class="voice-login-hero">
+      <div class="brand">Aura-Mira</div>
+      <div class="brand-sub">Voice-First Women's Wellbeing & WFH Platform</div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center">
+        <span style="padding:3px 10px;background:rgba(255,126,182,.1);border:1px solid rgba(255,126,182,.25);border-radius:20px;font-size:11px;color:#ff7eb6">♀️ Women-First</span>
+        <span style="padding:3px 10px;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.25);border-radius:20px;font-size:11px;color:var(--a)">🎙️ Voice-First</span>
+        <span style="padding:3px 10px;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.25);border-radius:20px;font-size:11px;color:var(--a3)">🔒 Confidential</span>
+        <span style="padding:3px 10px;background:rgba(210,168,255,.1);border:1px solid rgba(210,168,255,.25);border-radius:20px;font-size:11px;color:var(--a4)">🌸 8 Women's Policies</span>
+      </div>
+    </div>
+
+    <!-- BIG ORB -->
+    <div class="voice-orb-wrap">
+      <div class="v-orb" id="loginOrb" onclick="toggleLoginVoice()">
+        <span class="orb-icon" id="loginOrbIcon">🎙️</span>
+      </div>
+      <div class="waveform" id="loginWave">
+        <div class="wave-bar" style="animation-delay:0s"></div>
+        <div class="wave-bar" style="animation-delay:.1s"></div>
+        <div class="wave-bar" style="animation-delay:.2s"></div>
+        <div class="wave-bar" style="animation-delay:.3s"></div>
+        <div class="wave-bar" style="animation-delay:.4s"></div>
+        <div class="wave-bar" style="animation-delay:.3s"></div>
+        <div class="wave-bar" style="animation-delay:.2s"></div>
+        <div class="wave-bar" style="animation-delay:.1s"></div>
+      </div>
+      <div class="orb-status" id="loginOrbStatus">Tap the orb and say your name & password</div>
+    </div>
+
+    <div class="transcript-box" id="loginTranscript">
+      <span class="transcript-placeholder">Say: "Login Priya password pass123" or just "Priya pass123"</span>
+    </div>
+    <div class="ai-reply" id="loginReply"></div>
+
+    <div class="quick-grid">
+      <div class="qcmd" onclick="voiceLogin('EMP001','pass123')">🗣️ "Priya pass123"</div>
+      <div class="qcmd" onclick="voiceLogin('EMP003','pass123')">🗣️ "Anita pass123" (HR)</div>
+      <div class="qcmd" onclick="voiceLogin('EMP002','pass123')">🗣️ "Rahul pass123"</div>
+      <div class="qcmd" onclick="voiceLogin('ADM001','admin123')">🗣️ "Admin admin123"</div>
+    </div>
+
+    <div class="divider">or sign in manually</div>
+
+    <div class="manual-form">
+      <div class="mf-title">⌨️ Manual Login</div>
+      <div class="mf-row">
+        <input class="mf-inp" id="lid" placeholder="Employee ID (e.g. EMP001)" autocomplete="off">
+        <input class="mf-inp" id="lpw" type="password" placeholder="Password">
+      </div>
+      <button class="btn-login" onclick="doManualLogin()">Sign In →</button>
+    </div>
+
+    <div style="margin-bottom:8px;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">Demo accounts</div>
+    <div class="demo-pills">
+      <div class="dpill" onclick="quickFill('EMP001','pass123')">👩 Priya <span class="dpill-role r-emp">F / ENG</span></div>
+      <div class="dpill" onclick="quickFill('EMP002','pass123')">👨 Rahul <span class="dpill-role r-emp">M / FIN</span></div>
+      <div class="dpill" onclick="quickFill('EMP003','pass123')">👩 Anita <span class="dpill-role r-hr">HR</span></div>
+      <div class="dpill" onclick="quickFill('EMP004','pass123')">👩 Kavya <span class="dpill-role r-emp">F / MKT</span></div>
+      <div class="dpill" onclick="quickFill('ADM001','admin123')">🛡️ Admin <span class="dpill-role r-adm">ADM</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ MAIN APP ══════════════ -->
+<div id="pg-app" class="page">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">🏠</div>
+      <div class="sb-title">Aura-Mira</div>
+    </div>
+
+    <div class="sb-sec">
+      <div class="sb-sec-lbl">Main</div>
+      <div class="nav on" onclick="goSec('dashboard')"><span class="ni">📊</span> Dashboard</div>
+      <div class="nav" onclick="goSec('voice')"><span class="ni">🎙️</span> Voice Assistant <span class="nb">AI</span></div>
+      <div class="nav" onclick="goSec('advisor')"><span class="ni">🧠</span> AI Leave Advisor <span class="nb" style="background:linear-gradient(135deg,var(--a),var(--a4));font-size:9px">NEW</span></div>
+      <div class="nav" onclick="goSec('apply')"><span class="ni">📝</span> Apply Leave / WFH</div>
+      <div class="nav" onclick="goSec('myleaves')"><span class="ni">📅</span> My History</div>
+    </div>
+
+    <div class="sb-sec" id="hrNav" style="display:none">
+      <div class="sb-sec-lbl">HR / Admin</div>
+      <div class="nav" onclick="goSec('approvals')"><span class="ni">✅</span> Approvals <span class="nb" id="pendBadge">0</span></div>
+      <div class="nav" onclick="goSec('employees')"><span class="ni">👥</span> Employees</div>
+      <div class="nav" onclick="goSec('policies')"><span class="ni">📋</span> Policies</div>
+      <div class="nav" onclick="goSec('reports')"><span class="ni">📈</span> Reports</div>
+    </div>
+
+    <div class="sb-sec">
+      <div class="sb-sec-lbl">System</div>
+      <div class="nav" onclick="goSec('db')"><span class="ni">🗄️</span> Live Database</div>
+    </div>
+
+    <div class="sb-voice-mini">
+      <button class="voice-mini-btn" id="miniVoiceBtn" onclick="toggleAppVoice()">
+        <span id="miniVoiceIcon">🎙️</span> <span id="miniVoiceText">Voice Command</span>
+      </button>
+      <div style="margin-top:8px;font-size:11px;color:var(--t3);text-align:center" id="miniStatus">Say anything to control the app</div>
+    </div>
+
+    <div style="margin-top:10px;padding:0 12px">
+      <div class="sb-user">
+        <div class="sb-avatar" id="sbAvatar">U</div>
+        <div>
+          <div class="sb-uname" id="sbName">—</div>
+          <div class="sb-urole" id="sbRole">—</div>
+        </div>
+        <button class="sb-logout" onclick="logout()" title="Logout">⇥</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- VOICE INDICATOR BAR (top) -->
+    <div id="voiceBar" style="display:none;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.2);border-radius:10px;padding:12px 18px;margin-bottom:18px;display:none;align-items:center;gap:12px">
+      <div style="font-size:20px" id="vbarIcon">🎙️</div>
+      <div style="flex:1">
+        <div style="font-size:12px;color:var(--a);font-weight:600" id="vbarStatus">Listening...</div>
+        <div style="font-size:13px;color:var(--t);margin-top:2px;font-family:var(--fm)" id="vbarText">—</div>
+      </div>
+      <div style="font-size:11px;color:var(--t2)" id="vbarReply"></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="sec on" id="sec-dashboard">
+      <div class="wbanner">
+        <div>
+          <div style="font-family:var(--ff);font-size:22px;font-weight:700" id="wMsg">Good Day! 👋</div>
+          <div style="color:var(--t2);font-size:13px;margin-top:3px" id="wSub">Loading your summary...</div>
+        </div>
+        <button class="btn btn-p" onclick="goSec('apply')">+ Apply WFH</button>
+      </div>
+      <div class="sgrid" id="sgrid"></div>
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px">
+        <div class="card">
+          <div class="ct">📋 Recent Applications</div>
+          <div class="tw"><table><thead><tr><th>Date</th><th>Type</th><th>Status</th><th>Days</th></tr></thead><tbody id="recentTbl"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="ct">💰 Leave Balance</div>
+          <div id="balPanel"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VOICE SECTION -->
+    <div class="sec" id="sec-voice">
+      <div class="ph"><div><div class="pt">🎙️ Voice Assistant</div><div class="ps">Full voice control — login, apply, approve, check balance, navigate</div></div></div>
+
+      <div class="voice-panel-app">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
+          <div class="v-orb" id="appOrb" onclick="toggleAppVoice()" style="width:72px;height:72px">
+            <span class="orb-icon" style="font-size:28px" id="appOrbIcon">🎙️</span>
+          </div>
+          <div>
+            <div style="font-family:var(--ff);font-size:18px;font-weight:700">AI Voice Assistant</div>
+            <div style="color:var(--t2);font-size:12px;margin-top:3px" id="appVoiceStatus">Click orb to activate — say anything!</div>
+            <div class="waveform" id="appWave" style="height:24px;margin-top:6px">
+              <div class="wave-bar" style="animation-delay:0s"></div>
+              <div class="wave-bar" style="animation-delay:.1s"></div>
+              <div class="wave-bar" style="animation-delay:.2s"></div>
+              <div class="wave-bar" style="animation-delay:.15s"></div>
+              <div class="wave-bar" style="animation-delay:.05s"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transcript-box" id="appTranscript" style="margin-bottom:10px">
+          <span class="transcript-placeholder">Speak or type your command...</span>
+        </div>
+        <div class="ai-reply" id="appReply"></div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <input id="txtCmd" placeholder="Type command here..." style="flex:1;padding:10px 14px;background:var(--s2);border:1px solid var(--b);border-radius:9px;color:var(--t);font-family:var(--fb);font-size:13px;outline:none;min-width:200px" onkeydown="if(event.key==='Enter')runTextCmd()">
+          <button class="btn btn-p" onclick="runTextCmd()">Send ▶</button>
+          <button class="btn btn-o" onclick="clearConv()">Clear</button>
+        </div>
+
+        <div style="margin-bottom:8px;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">Quick commands</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px">
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('apply wfh for today')">🏠 WFH Today</div>
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('apply wfh for tomorrow')">📅 WFH Tomorrow</div>
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('apply sick leave for today')">🤒 Sick Leave</div>
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('check my wfh balance')">💰 WFH Balance</div>
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('check all my leave balance')">📊 All Balance</div>
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('show my leave history')">📋 My History</div>
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('apply maternity leave')">🤱 Maternity</div>
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('apply childcare leave')">👶 Childcare</div>
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('go to approvals')">✅ Approvals</div>
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('show policies')">📋 Policies</div>
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('open database')">🗄️ Database</div>
+          <div class="chip" style="cursor:pointer" onclick="processAppCmd('logout')">⇥ Logout</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ct">💬 Conversation History</div>
+        <div class="conv-wrap" id="convWrap">
+          <div class="bubble bubble-sys">👋 Hi! I'm Aura-Mira, your intelligent wellbeing & leave assistant. I can apply leaves, navigate pages, check balances, approve requests — all by voice. Try saying "Apply WFH for tomorrow"!</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ct">🗣️ What I Can Do — Voice Commands Guide</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div style="background:var(--s2);border-radius:10px;padding:14px">
+            <div style="font-size:12px;font-weight:600;color:var(--a);margin-bottom:8px">🏠 WFH Commands</div>
+            <div style="font-size:11px;color:var(--t2);line-height:2">"Apply WFH for today"<br>"Apply WFH for tomorrow"<br>"Apply WFH for Monday"<br>"WFH for next 3 days"</div>
+          </div>
+          <div style="background:var(--s2);border-radius:10px;padding:14px">
+            <div style="font-size:12px;font-weight:600;color:var(--a4);margin-bottom:8px">📋 Leave Commands</div>
+            <div style="font-size:11px;color:var(--t2);line-height:2">"Apply sick leave today"<br>"Apply casual leave tomorrow"<br>"Apply maternity leave"<br>"Apply childcare leave"</div>
+          </div>
+          <div style="background:var(--s2);border-radius:10px;padding:14px">
+            <div style="font-size:12px;font-weight:600;color:var(--a3);margin-bottom:8px">📊 Info Commands</div>
+            <div style="font-size:11px;color:var(--t2);line-height:2">"Check WFH balance"<br>"Show my history"<br>"How many days left?"<br>"Show all balances"</div>
+          </div>
+          <div style="background:var(--s2);border-radius:10px;padding:14px">
+            <div style="font-size:12px;font-weight:600;color:var(--a5);margin-bottom:8px">🧭 Navigation</div>
+            <div style="font-size:11px;color:var(--t2);line-height:2">"Go to dashboard"<br>"Open approvals"<br>"Show employees"<br>"Open database"</div>
+          </div>
+          <div style="background:var(--s2);border-radius:10px;padding:14px">
+            <div style="font-size:12px;font-weight:600;color:var(--pink);margin-bottom:8px">✅ HR Commands</div>
+            <div style="font-size:11px;color:var(--t2);line-height:2">"Show pending approvals"<br>"Approve all pending"<br>"Reject application 3"<br>"Show reports"</div>
+          </div>
+          <div style="background:var(--s2);border-radius:10px;padding:14px">
+            <div style="font-size:12px;font-weight:600;color:var(--a2);margin-bottom:8px">🔐 Auth + Other</div>
+            <div style="font-size:11px;color:var(--t2);line-height:2">"Logout"<br>"Who am I?"<br>"What's today's date?"<br>"Show policies"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- AI LEAVE ADVISOR -->
+    <div class="sec" id="sec-advisor">
+      <div class="ph">
+        <div>
+          <div class="pt">&#x1F9E0; AI Leave Advisor</div>
+          <div class="ps">Describe your situation &mdash; AI analyzes your policies &amp; balance and suggests the best options</div>
+        </div>
+      </div>
+
+      <div class="advisor-hero">
+        <div class="advisor-hero-inner">
+          <div class="advisor-brain">&#x1F9E0;</div>
+          <div style="flex:1">
+            <div style="font-family:var(--ff);font-size:19px;font-weight:700;margin-bottom:5px">Smart Leave &amp; WFH Advisor</div>
+            <div style="font-size:13px;color:var(--t2);line-height:1.6">Tell me why you need time off in plain language. I'll analyze your <strong style="color:var(--t)">real-time balance</strong>, match against your <strong style="color:var(--t)">applicable policies</strong>, and recommend the best options &mdash; ranked by suitability.</div>
+            <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:11px;color:var(--t3)">
+              <span>&#x2726; Policy-aware suggestions</span>
+              <span>&#x2726; Live balance checks</span>
+              <span>&#x2726; One-click apply</span>
+              <span>&#x2726; Gender-specific entitlements</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:20px;align-items:start">
+        <div>
+          <div class="adv-reason-wrap">
+            <div class="adv-reason-label">🎙️ Describe your situation (voice or text)</div>
+            <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+              <button id="advVoiceBtn" onclick="toggleAdvVoice()" style="padding:9px 16px;background:linear-gradient(135deg,rgba(88,166,255,.12),rgba(210,168,255,.08));border:1px solid var(--b2);border-radius:10px;color:var(--a);font-family:var(--fb);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s">
+                <span id="advVoiceBtnIcon">🎙️</span><span id="advVoiceBtnTxt">Speak your situation</span>
+              </button>
+              <div class="waveform" id="advWave" style="height:22px">
+                <div class="wave-bar" style="animation-delay:0s"></div>
+                <div class="wave-bar" style="animation-delay:.1s"></div>
+                <div class="wave-bar" style="animation-delay:.2s"></div>
+                <div class="wave-bar" style="animation-delay:.15s"></div>
+                <div class="wave-bar" style="animation-delay:.05s"></div>
+              </div>
+            </div>
+            <textarea id="advReason" class="adv-reason-inp" placeholder="e.g. I have a fever and need to rest tomorrow...
+
+e.g. My child's school annual day is next Friday, I need to attend...
+
+e.g. I have a doctor appointment for annual health checkup next week..."></textarea>
+          </div>
+
+          <div style="font-size:11px;color:var(--t3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">&#x1F4A1; Try an example</div>
+          <div class="adv-examples">
+            <div class="adv-ex" onclick="fillAdvReason(this.textContent)">Feeling sick with fever today</div>
+            <div class="adv-ex" onclick="fillAdvReason(this.textContent)">Child school function next Friday</div>
+            <div class="adv-ex" onclick="fillAdvReason(this.textContent)">Doctor appointment next week</div>
+            <div class="adv-ex" onclick="fillAdvReason(this.textContent)">Plumber visit want to WFH</div>
+            <div class="adv-ex" onclick="fillAdvReason(this.textContent)">Family vacation need 5 days off</div>
+            <div class="adv-ex" onclick="fillAdvReason(this.textContent)">Personal errand need half a day</div>
+            <div class="adv-ex" onclick="fillAdvReason(this.textContent)">Pregnancy checkup appointment</div>
+            <div class="adv-ex" onclick="fillAdvReason(this.textContent)">Internet is down can work from home</div>
+            <div class="adv-ex" onclick="fillAdvReason(this.textContent)">Womens health issue need a day</div>
+            <div class="adv-ex" onclick="fillAdvReason(this.textContent)">Need to care for sick child at home</div>
+          </div>
+
+          <button class="adv-btn" id="advBtn" onclick="runAdvisor()">
+            <span id="advBtnIcon">&#x1F9E0;</span>
+            <span id="advBtnText">Analyze &amp; Suggest Best Options</span>
+          </button>
+
+          <div class="adv-thinking" id="advThinking" style="margin-top:18px">
+            <div style="font-size:14px;color:var(--a);font-weight:600" id="advThinkingMsg">Analyzing your situation...</div>
+            <div style="font-size:12px;color:var(--t3);margin-top:4px" id="advThinkingSub">Checking your balance &amp; matching policies</div>
+            <div class="adv-dots"><div class="adv-dot"></div><div class="adv-dot"></div><div class="adv-dot"></div></div>
+          </div>
+
+          <div class="adv-results" id="advResults" style="margin-top:18px">
+            <div class="adv-insight" id="advInsight"></div>
+            <div id="advCards"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="ct">&#x1F4B0; Your Live Balance</div>
+            <div id="advBalPanel" style="font-size:13px;color:var(--t2)">Login to view balance.</div>
+          </div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="ct">&#x1F4CB; Your Applicable Policies</div>
+            <div id="advPolicyPanel" style="font-size:12px;color:var(--t2);line-height:1.9">Login to view policies.</div>
+          </div>
+          <div class="card">
+            <div class="ct">&#x1F550; Recent Queries</div>
+            <div id="advHistory"><div style="font-size:12px;color:var(--t3);text-align:center;padding:12px">No queries yet &mdash; describe your situation above!</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPLY -->
+    <div class="sec" id="sec-apply">
+      <div class="ph"><div><div class="pt">📝 Apply Leave / WFH</div><div class="ps">Submit your request — or just say it!</div></div></div>
+      <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:18px">
+        <div class="card">
+          <div class="ct">New Application</div>
+          <div class="fg"><label>Type</label>
+            <select id="aType" onchange="onTypeChange()">
+              <option value="wfh">🏠 Work From Home (WFH)</option>
+              <option value="casual">🌴 Casual Leave</option>
+              <option value="sick">🏥 Sick Leave</option>
+              <option value="maternity">🤱 Maternity Leave</option>
+              <option value="paternity">👨‍👶 Paternity Leave</option>
+              <option value="childcare">👶 Child Care Leave</option>
+              <option value="womenhealth">♀️ Women's Health Leave</option>
+              <option value="menstrual">🌸 Menstrual Wellness Leave</option>
+              <option value="fertility">💗 Fertility Treatment Leave</option>
+              <option value="menopause">🌺 Menopause Support Leave</option>
+              <option value="domestic_violence">🛡️ Domestic Violence Support</option>
+              <option value="wellness_check">🩺 Wellness Check Leave</option>
+              <option value="earned">💼 Earned Leave</option>
+            </select>
+          </div>
+          <div class="fgrid">
+            <div class="fg"><label>From Date</label><input type="date" id="aFrom"></div>
+            <div class="fg"><label>To Date</label><input type="date" id="aTo"></div>
+            <div class="fg full"><label>Reason</label><textarea id="aReason" rows="3" placeholder="Brief reason..."></textarea></div>
+          </div>
+          <div id="policyNote2" style="background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.15);border-radius:9px;padding:12px;font-size:12px;color:var(--a);margin-bottom:14px;display:none"></div>
+          <div class="btn-row">
+            <button class="btn btn-o" onclick="clearForm()">Clear</button>
+            <button class="btn btn-g" onclick="submitApp()">Submit Application ✓</button>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="ct">💰 Your Balance</div>
+            <div id="applyBal"></div>
+          </div>
+          <div class="card">
+            <div class="ct">📌 Policy Note</div>
+            <div id="applyPolicyNote" style="font-size:12px;color:var(--t2);line-height:1.8">Select leave type to see applicable policy.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY LEAVES -->
+    <div class="sec" id="sec-myleaves">
+      <div class="ph"><div><div class="pt">📅 My Applications</div><div class="ps">Complete leave and WFH history</div></div></div>
+      <div class="card">
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+          <div class="db-tab on" onclick="filterMy('all',this)">All</div>
+          <div class="db-tab" onclick="filterMy('wfh',this)">WFH Only</div>
+          <div class="db-tab" onclick="filterMy('leave',this)">Leaves</div>
+          <div class="db-tab" onclick="filterMy('pending',this)">Pending</div>
+          <div class="db-tab" onclick="filterMy('approved',this)">Approved</div>
+        </div>
+        <div class="tw"><table><thead><tr><th>#ID</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Applied</th><th>Reason</th></tr></thead><tbody id="myTbl"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- APPROVALS -->
+    <div class="sec" id="sec-approvals">
+      <div class="ph"><div><div class="pt">✅ Approvals</div><div class="ps">Review pending employee requests</div></div>
+        <button class="btn btn-g" onclick="processAppCmd('approve all pending')">✓ Approve All</button>
+      </div>
+      <div class="card">
+        <div class="tw"><table><thead><tr><th>#ID</th><th>Employee</th><th>Type</th><th>Dates</th><th>Days</th><th>Status</th><th>Action</th></tr></thead><tbody id="apprTbl"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- EMPLOYEES -->
+    <div class="sec" id="sec-employees">
+      <div class="ph"><div><div class="pt">👥 Employees</div></div>
+        <button class="btn btn-g" onclick="openAddEmp()">+ Add Employee</button>
+      </div>
+      <div class="card">
+        <div class="tw"><table><thead><tr><th>ID</th><th>Name</th><th>Dept</th><th>Gender</th><th>Role</th><th>WFH Used</th><th>WFH Left</th><th>Status</th></tr></thead><tbody id="empTbl"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- POLICIES -->
+    <div class="sec" id="sec-policies">
+      <div class="ph"><div><div class="pt">📋 Policies</div><div class="ps">Leave & WFH entitlements</div></div></div>
+      <div class="pgrid" id="polGrid"></div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="sec" id="sec-reports">
+      <div class="ph"><div><div class="pt">📈 Reports</div></div></div>
+      <div class="sgrid" id="repStats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card"><div class="ct">🏠 WFH by Department</div><div id="deptChart"></div></div>
+        <div class="card"><div class="ct">📊 Leave Types</div><div id="typeChart"></div></div>
+      </div>
+      <div class="card"><div class="ct">All Applications</div><div class="tw"><table><thead><tr><th>ID</th><th>Employee</th><th>Dept</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th></tr></thead><tbody id="repTbl"></tbody></table></div></div>
+    </div>
+
+    <!-- DATABASE -->
+    <div class="sec" id="sec-db">
+      <div class="ph"><div><div class="pt">🗄️ Live Database</div><div class="ps">All data stored in IndexedDB (browser-native persistent storage)</div></div>
+        <button class="btn btn-o" onclick="refreshDb()">↻ Refresh</button>
+      </div>
+
+      <div class="db-info-box">
+        📁 <strong>Database Name:</strong> FlexWorkDB &nbsp;|&nbsp;
+        🏷️ <strong>Type:</strong> IndexedDB (Browser SQLite Equivalent)<br>
+        🗂️ <strong>Tables:</strong> employees · applications · leave_balances · policies · audit_log<br>
+        💾 <strong>Persistence:</strong> Survives page refresh — data stored in browser permanently<br>
+        🌐 <strong>SQLite Equivalent Path:</strong> <code>./data/flexwork.db</code> &nbsp;|&nbsp;
+        <strong>Version:</strong> 1.0 &nbsp;|&nbsp; <strong>Status:</strong> <span style="color:var(--a3)">● Connected</span>
+      </div>
+
+      <div class="db-sql" id="dbSqlPreview">-- SELECT * FROM employees; &nbsp; -- Click a table tab below to view its data</div>
+
+      <div class="db-tabs" id="dbTabs">
+        <div class="db-tab on" onclick="showDbTbl('employees',this)">📋 employees</div>
+        <div class="db-tab" onclick="showDbTbl('applications',this)">📋 applications</div>
+        <div class="db-tab" onclick="showDbTbl('leave_balances',this)">📋 leave_balances</div>
+        <div class="db-tab" onclick="showDbTbl('policies',this)">📋 policies</div>
+        <div class="db-tab" onclick="showDbTbl('audit_log',this)">📋 audit_log</div>
+      </div>
+
+      <div class="db-rec-count" id="dbRecCount"></div>
+      <div class="card" id="dbTableView" style="padding:0;overflow:auto;max-height:500px"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /pg-app -->
+
+<!-- MODALS -->
+<div class="moverlay" id="apprModal">
+  <div class="modal">
+    <div class="modal-title" id="apprModalTitle">Review Application</div>
+    <div id="apprModalBody"></div>
+    <div class="btn-row">
+      <button class="btn btn-o" onclick="closeModal('apprModal')">Cancel</button>
+      <button class="btn btn-r" onclick="doAction('rejected')">✕ Reject</button>
+      <button class="btn btn-g" onclick="doAction('approved')">✓ Approve</button>
+    </div>
+  </div>
+</div>
+
+<div class="moverlay" id="addEmpModal">
+  <div class="modal">
+    <div class="modal-title">➕ Add Employee</div>
+    <div class="fgrid">
+      <div class="fg"><label>ID</label><input id="nId" placeholder="EMP010"></div>
+      <div class="fg"><label>Name</label><input id="nName" placeholder="Full Name"></div>
+      <div class="fg"><label>Department</label><select id="nDept"><option>Engineering</option><option>HR</option><option>Finance</option><option>Marketing</option><option>Operations</option><option>Legal</option></select></div>
+      <div class="fg"><label>Gender</label><select id="nGen"><option value="F">Female</option><option value="M">Male</option><option value="O">Other</option></select></div>
+      <div class="fg"><label>Designation</label><input id="nDes" placeholder="Software Engineer"></div>
+      <div class="fg"><label>Join Date</label><input type="date" id="nJoin"></div>
+      <div class="fg"><label>Email</label><input id="nEmail" placeholder="emp@company.com"></div>
+      <div class="fg"><label>Password</label><input type="password" id="nPass" placeholder="Set password"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-o" onclick="closeModal('addEmpModal')">Cancel</button>
+      <button class="btn btn-g" onclick="addEmp()">Add Employee ✓</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span id="tIcon"></span><span id="tMsg"></span></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  FLEXWORK AI — COMPLETE ENGINE
+// ═══════════════════════════════════════════════
+
+const DB = 'FlexWorkDB', DBV = 1;
+let db, cu = null, curAppId = null;
+let loginRec = null, appRec = null;
+let loginListening = false, appListening = false;
+
+// ── INDEXEDDB ──
+function idb(){return new Promise((res,rej)=>{
+  const r=indexedDB.open(DB,DBV);
+  r.onupgradeneeded=e=>{
+    const d=e.target.result;
+    ['employees','applications','leave_balances','policies','audit_log'].forEach(s=>{
+      if(!d.objectStoreNames.contains(s)){
+        if(s==='applications'||s==='audit_log') d.createObjectStore(s,{keyPath:'id',autoIncrement:true});
+        else d.createObjectStore(s,{keyPath:'id'});
+      }
+    });
+  };
+  r.onsuccess=e=>{db=e.target.result;res()};
+  r.onerror=e=>rej(e);
+})}
+
+const get=(s,k)=>new Promise((r,j)=>{const t=db.transaction(s,'readonly');const q=t.objectStore(s).get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>j()});
+const getAll=(s,idx,v)=>new Promise((r,j)=>{const t=db.transaction(s,'readonly');const os=t.objectStore(s);const q=idx?os.index(idx).getAll(v):os.getAll();q.onsuccess=()=>r(q.result);q.onerror=()=>j()});
+const put=(s,o)=>new Promise((r,j)=>{const t=db.transaction(s,'readwrite');const q=t.objectStore(s).put(o);q.onsuccess=()=>r(q.result);q.onerror=()=>j()});
+const del=(s,k)=>new Promise((r,j)=>{const t=db.transaction(s,'readwrite');const q=t.objectStore(s).delete(k);q.onsuccess=()=>r(q.result);q.onerror=()=>j()});
+
+// ── SEED ──
+async function seed(){
+  const ex=await getAll('employees');if(ex.length)return;
+  const emps=[
+    {id:'EMP001',name:'Priya Sharma',dept:'Engineering',designation:'Senior Software Engineer',gender:'F',email:'priya@flexwork.com',password:'pass123',role:'employee',joinDate:'2020-03-15',status:'active',wfhTotal:16,wfhUsed:3},
+    {id:'EMP002',name:'Rahul Kumar',dept:'Finance',designation:'Financial Analyst',gender:'M',email:'rahul@flexwork.com',password:'pass123',role:'employee',joinDate:'2019-07-01',status:'active',wfhTotal:8,wfhUsed:2},
+    {id:'EMP003',name:'Anita Desai',dept:'HR',designation:'HR Manager',gender:'F',email:'anita@flexwork.com',password:'pass123',role:'hr',joinDate:'2018-01-10',status:'active',wfhTotal:16,wfhUsed:5},
+    {id:'EMP004',name:'Kavya Nair',dept:'Marketing',designation:'Marketing Lead',gender:'F',email:'kavya@flexwork.com',password:'pass123',role:'employee',joinDate:'2021-05-20',status:'active',wfhTotal:16,wfhUsed:4},
+    {id:'EMP005',name:'Deepa Menon',dept:'Engineering',designation:'QA Engineer',gender:'F',email:'deepa@flexwork.com',password:'pass123',role:'employee',joinDate:'2022-02-14',status:'active',wfhTotal:16,wfhUsed:1},
+    {id:'EMP006',name:'Arjun Mehta',dept:'Operations',designation:'Operations Manager',gender:'M',email:'arjun@flexwork.com',password:'pass123',role:'employee',joinDate:'2017-11-03',status:'active',wfhTotal:8,wfhUsed:2},
+    {id:'EMP007',name:'Sunita Rao',dept:'Legal',designation:'Legal Counsel',gender:'F',email:'sunita@flexwork.com',password:'pass123',role:'employee',joinDate:'2019-09-15',status:'active',wfhTotal:16,wfhUsed:8},
+    {id:'EMP008',name:'Meena Pillai',dept:'Engineering',designation:'DevOps Engineer',gender:'F',email:'meena@flexwork.com',password:'pass123',role:'employee',joinDate:'2021-08-01',status:'active',wfhTotal:16,wfhUsed:0},
+    {id:'ADM001',name:'Admin User',dept:'Admin',designation:'System Administrator',gender:'M',email:'admin@flexwork.com',password:'admin123',role:'admin',joinDate:'2015-01-01',status:'active',wfhTotal:0,wfhUsed:0}
+  ];
+  for(const e of emps) await put('employees',e);
+
+  const pols=[
+    {id:'WFH_F',name:"Women's Flexibility WFH",type:'WFH',applicableTo:'F',days:16,unit:'month',description:'Female employees get 16 WFH days/month to support work-life balance and wellbeing.',conditions:['No approval for first 8 days','Inform manager by 9 AM','All deliverables must be met'],color:'#ff7eb6'},
+    {id:'WFH_M',name:'Standard WFH Policy',type:'WFH',applicableTo:'M',days:8,unit:'month',description:'Male employees get 8 WFH days/month subject to manager approval.',conditions:['24hr advance notice preferred','Deliverables must be met','VPN mandatory'],color:'#58a6ff'},
+    {id:'WFH_ENG',name:'Engineering WFH Enhanced',type:'WFH',applicableTo:'Engineering',days:12,unit:'month',description:'Engineering team gets 12 days WFH/month due to nature of work.',conditions:['Sprint commitments mandatory','Code review participation','VPN + secure connection'],color:'#4c9eff'},
+    {id:'MAT',name:'Maternity Leave',type:'Maternity',applicableTo:'F',days:180,unit:'total',description:'26 weeks (180 days) fully paid maternity leave. Can begin 8 weeks before due date.',conditions:['Min 80 days employment','Medical certificate required','Can extend 4 weeks unpaid'],color:'#ff7eb6'},
+    {id:'PAT',name:'Paternity Leave',type:'Paternity',applicableTo:'M',days:15,unit:'total',description:'15 days paid paternity leave within 6 months of childbirth.',conditions:['Birth certificate required','Can be split into 2 periods','Apply 2 weeks in advance'],color:'#3fb950'},
+    {id:'CCL',name:'Child Care Leave',type:'Childcare',applicableTo:'F',days:730,unit:'lifetime',description:'2 years total child care leave (lifetime) for children under 18.',conditions:['Children up to 18 years','Max 3 months per stretch','Any child-related need'],color:'#d2a8ff'},
+    {id:'WHL',name:"Women's Health Leave",type:'Health',applicableTo:'F',days:12,unit:'year',description:'Confidential health leave for women including menstrual health, annual checkups.',conditions:['Self-cert for 2 days','Doctor note for 3+ days','Fully confidential'],color:'#f78166'},
+    {id:'SL',name:'Sick Leave',type:'Sick',applicableTo:'all',days:12,unit:'year',description:'12 days sick leave per year. Medical cert needed for 3+ consecutive days.',conditions:['Inform supervisor by 9 AM','Doctor cert for 3+ days','Cannot carry forward'],color:'#ffa657'},
+    {id:'CL',name:'Casual Leave',type:'Casual',applicableTo:'all',days:15,unit:'year',description:'15 days casual leave for personal needs. Prior approval preferred.',conditions:['1 day advance notice','Max 3 consecutive days','5 days carry forward'],color:'#3fb950'},
+    {id:'EL',name:'Earned Leave',type:'Earned',applicableTo:'all',days:21,unit:'year',description:'21 days earned leave per year. Can be encashed or carried forward.',conditions:['1 month advance notice','Accumulate up to 60 days','Encashment at year-end'],color:'#58a6ff'},
+    {id:'PNL',name:'Prenatal Care Leave',type:'Prenatal',applicableTo:'F',days:8,unit:'pregnancy',description:'Special leave for prenatal appointments during pregnancy.',conditions:['Appointment proof required','Half-day option available','Separate from maternity'],color:'#ff7eb6'},
+    {id:'SPM',name:'Single Parent WFH+',type:'WFH',applicableTo:'F',days:20,unit:'month',description:'Single mothers with children under 12 get 20 WFH days/month.',conditions:['One-time HR declaration','Reviewed annually','Priority project exception'],color:'#d2a8ff'},
+    {id:'MEN',name:'Menstrual Wellness Leave',type:'Health',applicableTo:'F',days:24,unit:'year',description:'2 days per month (24/year) for menstrual health and wellness. Fully confidential, no documentation needed.',conditions:['Self-declaration only','No documentation required','Fully confidential','Cannot carry forward'],color:'#ff7eb6'},
+    {id:'FER',name:'Fertility Treatment Leave',type:'Health',applicableTo:'F',days:10,unit:'year',description:'Paid leave for fertility treatments, IVF cycles, and related medical procedures.',conditions:['Medical appointment proof','Confidential — not disclosed','Can be taken in half-days'],color:'#d2a8ff'},
+    {id:'MEN_WF',name:'Menopause Support Leave',type:'Health',applicableTo:'F',days:12,unit:'year',description:'Leave for symptoms related to menopause and perimenopause to support wellbeing.',conditions:['Self-certification for 2 days','Doctor note for 3+ consecutive days','Fully confidential'],color:'#ffa657'},
+    {id:'DV',name:'Domestic Violence Support Leave',type:'Emergency',applicableTo:'F',days:10,unit:'year',description:'Confidential paid leave for women facing domestic violence situations, including legal proceedings and relocation.',conditions:['Fully confidential','HR support available','Legal aid resources provided'],color:'#f78166'},
+    {id:'MIL',name:'Milk Break / Nursing Break',type:'Wellness',applicableTo:'F',days:999,unit:'ongoing',description:'Nursing mothers with children under 12 months get 2 paid breaks per day (30 mins each).',conditions:['Children under 12 months','Nursing room provided','No separate leave deducted'],color:'#ff7eb6'},
+    {id:'WCL',name:'Wellness Check Leave',type:'Health',applicableTo:'F',days:4,unit:'year',description:'Annual paid leave for routine women\'s wellness checkups (mammogram, PAP smear, bone density etc.).',conditions:['Appointment proof required','Scheduling via HR portal preferred','Half-day option available'],color:'#d2a8ff'},
+  ];
+  for(const p of pols) await put('policies',p);
+
+  // Balances
+  const balMap={wfh:0,casual:15,sick:12,earned:21,maternity:180,paternity:15,childcare:730,womenhealth:12,menstrual:24,fertility:10,menopause:12,domestic_violence:10,wellness_check:4};
+  for(const emp of emps){
+    if(emp.role==='admin') continue;
+    const types=['wfh','casual','sick','earned'];
+    if(emp.gender==='F') types.push('maternity','childcare','womenhealth','menstrual','fertility','menopause','domestic_violence','wellness_check');
+    else types.push('paternity');
+    for(const t of types){
+      const total=t==='wfh'?emp.wfhTotal:(balMap[t]||0);
+      const used=t==='wfh'?emp.wfhUsed:Math.floor(Math.random()*(t==='casual'?6:t==='sick'?3:t==='earned'?7:0));
+      await put('leave_balances',{id:`${emp.id}_${t}`,empId:emp.id,type:t,total,used,remaining:total-used});
+    }
+  }
+
+  // Sample apps
+  const td=()=>new Date().toISOString().split('T')[0];
+  const past=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().split('T')[0]};
+  const fut=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().split('T')[0]};
+  const apps=[
+    {empId:'EMP001',type:'wfh',fromDate:past(10),toDate:past(10),days:1,reason:'Deep focus day',status:'approved',appliedOn:past(11),approvedBy:'EMP003'},
+    {empId:'EMP001',type:'wfh',fromDate:past(5),toDate:past(4),days:2,reason:'Back-to-back online meetings',status:'approved',appliedOn:past(6),approvedBy:'EMP003'},
+    {empId:'EMP001',type:'sick',fromDate:past(20),toDate:past(19),days:2,reason:'Fever and cold',status:'approved',appliedOn:past(21),approvedBy:'EMP003'},
+    {empId:'EMP001',type:'wfh',fromDate:fut(2),toDate:fut(2),days:1,reason:'Plumber visit at home',status:'pending',appliedOn:td(),approvedBy:null},
+    {empId:'EMP002',type:'wfh',fromDate:past(3),toDate:past(3),days:1,reason:'Home maintenance',status:'approved',appliedOn:past(4),approvedBy:'EMP003'},
+    {empId:'EMP004',type:'casual',fromDate:past(7),toDate:past(6),days:2,reason:'Family function',status:'approved',appliedOn:past(8),approvedBy:'ADM001'},
+    {empId:'EMP004',type:'wfh',fromDate:fut(1),toDate:fut(1),days:1,reason:'Medical nearby',status:'pending',appliedOn:td(),approvedBy:null},
+    {empId:'EMP007',type:'womenhealth',fromDate:past(15),toDate:past(15),days:1,reason:'Annual checkup',status:'approved',appliedOn:past(16),approvedBy:'EMP003'},
+    {empId:'EMP005',type:'wfh',fromDate:fut(3),toDate:fut(5),days:3,reason:'Child school exams',status:'pending',appliedOn:td(),approvedBy:null},
+    {empId:'EMP003',type:'earned',fromDate:past(30),toDate:past(25),days:5,reason:'Family vacation',status:'approved',appliedOn:past(35),approvedBy:'ADM001'},
+  ];
+  for(const a of apps) await put('applications',a);
+  await put('audit_log',{action:'INIT',detail:'Database seeded',timestamp:new Date().toISOString(),user:'SYSTEM'});
+}
+
+// ── AUTH ──
+async function doManualLogin(){
+  const id=document.getElementById('lid').value.trim();
+  const pw=document.getElementById('lpw').value;
+  await tryLogin(id,pw,'manual');
+}
+
+async function tryLogin(id,pw,src='voice'){
+  const emp=await get('employees',id);
+  if(!emp||emp.password!==pw){
+    const msg='Invalid credentials. Please check your Employee ID and password.';
+    if(src==='voice'){setLoginReply(msg);speak(msg);}
+    else toast(msg,'error','❌');
+    return false;
+  }
+  cu=emp;
+  await put('audit_log',{action:'LOGIN',detail:`${emp.name} logged in via ${src}`,timestamp:new Date().toISOString(),user:emp.id});
+  enterApp();
+  return true;
+}
+
+async function voiceLogin(id,pw){
+  setLoginReply(`Logging in as ${id}...`);
+  await tryLogin(id,pw,'voice');
+}
+
+function quickFill(id,pw){document.getElementById('lid').value=id;document.getElementById('lpw').value=pw}
+
+function enterApp(){
+  document.getElementById('pg-login').classList.remove('active');
+  document.getElementById('pg-app').classList.add('active');
+  document.getElementById('sbAvatar').textContent=cu.name.charAt(0);
+  document.getElementById('sbName').textContent=cu.name;
+  document.getElementById('sbRole').textContent=cu.role.toUpperCase();
+  if(['admin','hr'].includes(cu.role)) document.getElementById('hrNav').style.display='';
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('aFrom').value=today;
+  document.getElementById('aTo').value=today;
+  document.getElementById('nJoin').value=today;
+  goSec('dashboard');
+  speak(`Welcome ${cu.name.split(' ')[0]}! You are now logged in. How can I help you today?`);
+  toast(`Welcome, ${cu.name}! 👋`,'success','🏠');
+}
+
+function logout(){
+  cu=null;
+  document.getElementById('pg-app').classList.remove('active');
+  document.getElementById('pg-login').classList.add('active');
+  document.getElementById('lid').value='';
+  document.getElementById('lpw').value='';
+  document.getElementById('pg-login').classList.add('active');
+  toast('Logged out','info','👋');
+}
+
+// ── NAVIGATION ──
+function goSec(name){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
+  const sec=document.getElementById('sec-'+name);
+  if(sec) sec.classList.add('on');
+  document.querySelectorAll('.nav').forEach(n=>{if(n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('on')});
+  if(name==='dashboard') renderDash();
+  else if(name==='myleaves') renderMyLeaves('all');
+  else if(name==='approvals') renderApprovals();
+  else if(name==='employees') renderEmployees();
+  else if(name==='policies') renderPolicies();
+  else if(name==='advisor'){renderAdvisor();}
+  else if(name==='apply'){renderApplyBal();onTypeChange();}
+  else if(name==='reports') renderReports();
+  else if(name==='db'){showDbTbl('employees',document.querySelector('.db-tab'));}
+}
+
+// ── DASHBOARD ──
+async function renderDash(){
+  const now=new Date();
+  const h=now.getHours();
+  const g=h<12?'Good Morning':h<17?'Good Afternoon':'Good Evening';
+  document.getElementById('wMsg').textContent=`${g}, ${cu.name.split(' ')[0]}! 👋`;
+  document.getElementById('wSub').textContent=now.toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  const bals=await getAll('leave_balances');const myBals=bals.filter(b=>b.empId===cu.id);
+  const wfh=myBals.find(b=>b.type==='wfh');
+  const cl=myBals.find(b=>b.type==='casual');
+  const sl=myBals.find(b=>b.type==='sick');
+  const apps=await getAll('applications');const myApps=apps.filter(a=>a.empId===cu.id);
+  const allPend=apps.filter(a=>a.status==='pending');
+  const isHR=['admin','hr'].includes(cu.role);
+  document.getElementById('pendBadge').textContent=allPend.length;
+
+  document.getElementById('sgrid').innerHTML=`
+    <div class="scard" style="--ca:#58a6ff"><div class="sc-lbl">WFH Available</div>
+      <div class="sc-val" style="color:var(--a)">${wfh?.remaining??0}</div>
+      <div class="sc-sub">of ${wfh?.total??0} days this month</div>
+      <div class="pb"><div class="pf" style="width:${wfh?wfh.remaining/wfh.total*100:0}%"></div></div>
+      <div class="sc-icon">🏠</div></div>
+    <div class="scard" style="--ca:#ffa657"><div class="sc-lbl">Casual Leave</div>
+      <div class="sc-val" style="color:var(--a5)">${cl?.remaining??0}</div>
+      <div class="sc-sub">${cl?.used??0} used of ${cl?.total??0}</div><div class="sc-icon">🌴</div></div>
+    <div class="scard" style="--ca:#3fb950"><div class="sc-lbl">Sick Leave</div>
+      <div class="sc-val" style="color:var(--a3)">${sl?.remaining??0}</div>
+      <div class="sc-sub">${sl?.used??0} used of ${sl?.total??0}</div><div class="sc-icon">🏥</div></div>
+    <div class="scard" style="--ca:#d2a8ff"><div class="sc-lbl">My Applications</div>
+      <div class="sc-val" style="color:var(--a4)">${myApps.length}</div>
+      <div class="sc-sub">${myApps.filter(a=>a.status==='pending').length} pending</div><div class="sc-icon">📋</div></div>
+    ${isHR?`<div class="scard" style="--ca:#f78166"><div class="sc-lbl">Pending Approvals</div>
+      <div class="sc-val" style="color:var(--a2)">${allPend.length}</div>
+      <div class="sc-sub">Awaiting your review</div><div class="sc-icon">⏳</div></div>`:''}
+  `;
+
+  const recent=myApps.sort((a,b)=>b.id-a.id).slice(0,6);
+  document.getElementById('recentTbl').innerHTML=recent.length?recent.map(a=>`
+    <tr><td>${a.fromDate}</td><td>${lbl(a.type)}</td><td><span class="badge ${bClass(a.status)}">${a.status}</span></td><td>${a.days}</td></tr>
+  `).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--t3);padding:20px">No applications yet</td></tr>';
+
+  document.getElementById('balPanel').innerHTML=myBals.map(b=>`
+    <div class="bi"><span class="bi-l">${lbl(b.type)}</span><span class="bi-r ${b.remaining<3?'low':''}">${b.remaining}/${b.total}</span></div>
+  `).join('');
+}
+
+// ── MY LEAVES ──
+async function renderMyLeaves(filter){
+  let apps=await getAll('applications');
+  let myApps=apps.filter(a=>a.empId===cu.id).sort((a,b)=>b.id-a.id);
+  if(filter==='wfh') myApps=myApps.filter(a=>a.type==='wfh');
+  else if(filter==='leave') myApps=myApps.filter(a=>a.type!=='wfh');
+  else if(filter==='pending') myApps=myApps.filter(a=>a.status==='pending');
+  else if(filter==='approved') myApps=myApps.filter(a=>a.status==='approved');
+
+  document.getElementById('myTbl').innerHTML=myApps.length?myApps.map(a=>`
+    <tr><td style="font-family:var(--fm);font-size:11px;color:var(--t3)">#${a.id}</td>
+      <td>${lbl(a.type)}</td><td>${a.fromDate}</td><td>${a.toDate}</td><td>${a.days}</td>
+      <td><span class="badge ${bClass(a.status)}">${a.status}</span></td>
+      <td style="color:var(--t2)">${a.appliedOn}</td>
+      <td style="max-width:200px">
+        <div style="color:var(--t2);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.reason||'-'}</div>
+        ${a.status==='rejected'&&a.rejectionReason?`
+          <div style="margin-top:5px;padding:6px 10px;background:rgba(247,129,102,.1);border:1px solid rgba(247,129,102,.25);border-radius:7px;font-size:11px;color:var(--a2)">
+            ❌ Rejected: ${a.rejectionReason}
+          </div>
+          <button onclick="smartReapply(${a.id})" style="margin-top:5px;padding:4px 10px;background:rgba(88,166,255,.12);border:1px solid rgba(88,166,255,.3);border-radius:6px;color:var(--a);font-size:11px;cursor:pointer;font-family:var(--fb)">💡 Smart Re-apply</button>
+        `:''}
+      </td></tr>
+  `).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:28px">No records</td></tr>';
+}
+
+function filterMy(f,el){
+  document.querySelectorAll('#sec-myleaves .db-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');renderMyLeaves(f);
+}
+
+// ── APPROVALS ──
+async function renderApprovals(){
+  let apps=await getAll('applications');
+  const pend=apps.filter(a=>a.status==='pending').sort((a,b)=>b.id-a.id);
+  document.getElementById('pendBadge').textContent=pend.length;
+  const empC={};const allEmps=await getAll('employees');for(const e of allEmps) empC[e.id]=e;
+  document.getElementById('apprTbl').innerHTML=pend.length?pend.map(a=>
+    `<tr><td style="font-family:var(--fm);font-size:11px;color:var(--t3)">#${a.id}</td>
+      <td><div style="font-weight:500">${empC[a.empId]?.name||a.empId}</div><div style="font-size:11px;color:var(--t3)">${empC[a.empId]?.dept||''}</div></td>
+      <td>${lbl(a.type)}</td><td>${a.fromDate}${a.fromDate!==a.toDate?` → ${a.toDate}`:''}</td><td>${a.days}</td>
+      <td><span class="badge bp">pending</span></td>
+      <td><button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="openAppr(${a.id})">Review</button></td></tr>`
+  ).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--t3);padding:28px">No pending approvals 🎉</td></tr>';
+}
+
+async function openAppr(id){
+  const app=await get('applications',id);
+  const emp=await get('employees',app.empId);
+  curAppId=id;
+  document.getElementById('apprModalTitle').textContent=`Review — ${lbl(app.type)}`;
+  document.getElementById('apprModalBody').innerHTML=`
+    <div style="background:var(--s2);border-radius:12px;padding:18px;margin-bottom:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
+        <div><div style="color:var(--t3);font-size:10px;margin-bottom:4px">EMPLOYEE</div><strong>${emp?.name}</strong></div>
+        <div><div style="color:var(--t3);font-size:10px;margin-bottom:4px">DEPT</div>${emp?.dept}</div>
+        <div><div style="color:var(--t3);font-size:10px;margin-bottom:4px">TYPE</div>${lbl(app.type)}</div>
+        <div><div style="color:var(--t3);font-size:10px;margin-bottom:4px">DAYS</div>${app.days}</div>
+        <div><div style="color:var(--t3);font-size:10px;margin-bottom:4px">FROM</div>${app.fromDate}</div>
+        <div><div style="color:var(--t3);font-size:10px;margin-bottom:4px">TO</div>${app.toDate}</div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--b)">
+        <div style="color:var(--t3);font-size:10px;margin-bottom:6px">REASON</div>
+        <div>${app.reason||'No reason given'}</div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:6px">Rejection Reason (required if rejecting)</label>
+      <textarea id="rejReasonInp" rows="2" style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--b);border-radius:9px;color:var(--t);font-family:var(--fb);font-size:13px;outline:none;resize:none" placeholder="e.g. Insufficient balance, critical project deadline, please reapply later..."></textarea>
+    </div>`;
+  document.getElementById('apprModal').classList.add('open');
+}
+
+async function doAction(status){
+  const app=await get('applications',curAppId);
+  app.status=status;app.approvedBy=cu.id;app.actionDate=new Date().toISOString().split('T')[0];
+  if(status==='rejected'){
+    const rejReason=document.getElementById('rejReasonInp')?.value?.trim()||'Rejected by HR';
+    app.rejectionReason=rejReason;
+  }
+  await put('applications',app);
+  if(status==='approved'){
+    const bid=`${app.empId}_${app.type}`;
+    const bal=await get('leave_balances',bid);
+    if(bal){bal.used+=app.days;bal.remaining=Math.max(0,bal.remaining-app.days);await put('leave_balances',bal);}
+    if(app.type==='wfh'){const e=await get('employees',app.empId);if(e){e.wfhUsed+=app.days;await put('employees',e);}}
+  }
+  await put('audit_log',{action:status.toUpperCase(),detail:`App #${curAppId} ${status} by ${cu.id}`,timestamp:new Date().toISOString(),user:cu.id});
+  closeModal('apprModal');renderApprovals();
+  toast(`Application ${status}`,(status==='approved'?'success':'error'),(status==='approved'?'✅':'❌'));
+  addBubble(`Application #${curAppId} has been ${status}.`,status==='approved'?'ai':'sys');
+}
+
+// ── EMPLOYEES ──
+async function renderEmployees(){
+  const emps=await getAll('employees');
+  document.getElementById('empTbl').innerHTML=emps.filter(e=>e.role!=='admin').map(e=>`
+    <tr><td style="font-family:var(--fm);font-size:11px;color:var(--t3)">${e.id}</td>
+      <td><div style="font-weight:500">${e.name}</div><div style="font-size:11px;color:var(--t3)">${e.designation}</div></td>
+      <td>${e.dept}</td>
+      <td style="color:${e.gender==='F'?'var(--pink)':'var(--a)'}">${e.gender==='F'?'♀️ Female':'♂️ Male'}</td>
+      <td><span class="badge ${e.role==='hr'?'bw':e.role==='admin'?'bc':'ba'}">${e.role}</span></td>
+      <td>${e.wfhUsed}</td><td>${e.wfhTotal-e.wfhUsed}</td>
+      <td><span class="badge ba">${e.status}</span></td></tr>
+  `).join('');
+}
+
+function openAddEmp(){document.getElementById('addEmpModal').classList.add('open')}
+async function addEmp(){
+  const e={
+    id:document.getElementById('nId').value.trim(),
+    name:document.getElementById('nName').value.trim(),
+    dept:document.getElementById('nDept').value,
+    gender:document.getElementById('nGen').value,
+    designation:document.getElementById('nDes').value.trim(),
+    joinDate:document.getElementById('nJoin').value,
+    email:document.getElementById('nEmail').value.trim(),
+    password:document.getElementById('nPass').value,
+    role:'employee',status:'active',
+    wfhTotal:document.getElementById('nGen').value==='F'?16:8,wfhUsed:0
+  };
+  if(!e.id||!e.name){toast('ID and Name required','error','❌');return;}
+  await put('employees',e);
+  const types=['wfh','casual','sick','earned'];
+  if(e.gender==='F') types.push('maternity','childcare','womenhealth','menstrual','fertility','menopause','domestic_violence','wellness_check');
+  else types.push('paternity');
+  const bMap={wfh:e.wfhTotal,casual:15,sick:12,earned:21,maternity:180,childcare:730,womenhealth:12,paternity:15,menstrual:24,fertility:10,menopause:12,domestic_violence:10,wellness_check:4};
+  for(const t of types) await put('leave_balances',{id:`${e.id}_${t}`,empId:e.id,type:t,total:bMap[t]||0,used:0,remaining:bMap[t]||0});
+  closeModal('addEmpModal');renderEmployees();
+  toast(`${e.name} added!`,'success','✅');
+}
+
+// ── POLICIES ──
+async function renderPolicies(){
+  const pols=await getAll('policies');
+  document.getElementById('polGrid').innerHTML=pols.map(p=>`
+    <div class="pcard" style="--pc:${p.color||'var(--a)'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div class="pn">${p.name}</div>
+          <div class="pt2">${p.type} · ${p.applicableTo==='all'?'All':p.applicableTo==='F'?'♀️ Female':'♂️ Male'}</div></div>
+        <div style="text-align:right"><div class="pdays" style="color:${p.color||'var(--a)'}">${p.days}</div>
+          <div style="font-size:11px;color:var(--t3)">${p.unit}</div></div>
+      </div>
+      <div class="pd">${p.description}</div>
+      ${p.conditions?`<div class="chips">${p.conditions.map(c=>`<div class="chip" style="background:${p.color||'var(--a)'}18;color:${p.color||'var(--a)'};border-color:${p.color||'var(--a)'}33">${c}</div>`).join('')}</div>`:''}
+    </div>
+  `).join('');
+}
+
+// ── REPORTS ──
+async function renderReports(){
+  const apps=await getAll('applications');
+  const emps=await getAll('employees');
+  const appr=apps.filter(a=>a.status==='approved');
+  const wfhApps=appr.filter(a=>a.type==='wfh');
+  const wfhDays=wfhApps.reduce((s,a)=>s+a.days,0);
+  const femaleCnt=emps.filter(e=>e.gender==='F').length;
+  document.getElementById('repStats').innerHTML=`
+    <div class="scard" style="--ca:#58a6ff"><div class="sc-lbl">Total Apps</div><div class="sc-val">${apps.length}</div><div class="sc-sub">${appr.length} approved</div><div class="sc-icon">📋</div></div>
+    <div class="scard" style="--ca:#d2a8ff"><div class="sc-lbl">WFH Days Taken</div><div class="sc-val">${wfhDays}</div><div class="sc-sub">all employees</div><div class="sc-icon">🏠</div></div>
+    <div class="scard" style="--ca:#ff7eb6"><div class="sc-lbl">Female Employees</div><div class="sc-val">${femaleCnt}</div><div class="sc-sub">enhanced WFH benefits</div><div class="sc-icon">♀️</div></div>
+    <div class="scard" style="--ca:#ffa657"><div class="sc-lbl">Pending Review</div><div class="sc-val">${apps.filter(a=>a.status==='pending').length}</div><div class="sc-sub">need action</div><div class="sc-icon">⏳</div></div>
+  `;
+  const ec={};for(const e of emps) ec[e.id]=e;
+  const dept={};for(const a of wfhApps){const e=ec[a.empId];if(e) dept[e.dept]=(dept[e.dept]||0)+a.days;}
+  const maxD=Math.max(...Object.values(dept),1);
+  document.getElementById('deptChart').innerHTML=Object.entries(dept).map(([d,v])=>`
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>${d}</span><span style="color:var(--t2)">${v}d</span></div>
+      <div class="pb"><div class="pf" style="width:${v/maxD*100}%"></div></div>
+    </div>`).join('')||'<p style="color:var(--t3)">No data</p>';
+  const ltyp={};for(const a of appr) ltyp[a.type]=(ltyp[a.type]||0)+a.days;
+  const maxT=Math.max(...Object.values(ltyp),1);
+  const tc={wfh:'var(--a)',casual:'var(--a3)',sick:'var(--a5)',maternity:'var(--pink)',paternity:'#4c9eff',childcare:'var(--a4)',womenhealth:'var(--a2)',earned:'#3fb950'};
+  document.getElementById('typeChart').innerHTML=Object.entries(ltyp).map(([t,v])=>`
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>${lbl(t)}</span><span style="color:var(--t2)">${v}d</span></div>
+      <div class="pb"><div class="pf" style="width:${v/maxT*100}%;background:${tc[t]||'var(--a)'}"></div></div>
+    </div>`).join('')||'<p style="color:var(--t3)">No data</p>';
+  document.getElementById('repTbl').innerHTML=apps.sort((a,b)=>b.id-a.id).map(a=>`
+    <tr><td style="font-family:var(--fm);font-size:11px;color:var(--t3)">#${a.id}</td>
+      <td>${ec[a.empId]?.name||a.empId}</td><td>${ec[a.empId]?.dept||'-'}</td>
+      <td>${lbl(a.type)}</td><td>${a.fromDate}</td><td>${a.toDate}</td><td>${a.days}</td>
+      <td><span class="badge ${bClass(a.status)}">${a.status}</span></td></tr>`).join('');
+}
+
+// ── APPLY ──
+async function renderApplyBal(){
+  const bals=await getAll('leave_balances');
+  const myBals=bals.filter(b=>b.empId===cu.id);
+  document.getElementById('applyBal').innerHTML=myBals.map(b=>`
+    <div class="bi"><span class="bi-l">${lbl(b.type)}</span>
+      <span class="bi-r ${b.remaining<3?'low':''}">${b.remaining}/${b.total}</span></div>`).join('');
+}
+
+function onTypeChange(){
+  const t=document.getElementById('aType').value;
+  const notes={
+    wfh:`📌 ${cu.gender==='F'?"Women's Flexibility Policy: 16 WFH days/month — you have enhanced benefits!":'Standard WFH: 8 days/month. Engineering team gets 12 days.'}`,
+    maternity:'🤱 Maternity: 180 days (26 weeks) fully paid. Medical certificate required.',
+    paternity:'👨‍👶 Paternity: 15 days within 6 months of childbirth.',
+    childcare:'👶 Child Care Leave: Up to 2 years lifetime for children under 18.',
+    womenhealth:'♀️ Fully confidential. Self-cert for 2 days, doctor note for 3+.',
+    menstrual:'🌸 Menstrual Wellness Leave: 2 days/month. Self-declaration only, fully confidential. No documentation needed.',
+    fertility:'💗 Fertility Treatment Leave: Confidential paid leave for IVF and fertility procedures. Medical appointment proof needed.',
+    menopause:'🌺 Menopause Support Leave: Confidential leave for menopause-related symptoms. Self-cert for 2 days.',
+    domestic_violence:'🛡️ DV Support Leave: Fully confidential. HR support and legal aid resources available.',
+    wellness_check:'🩺 Wellness Check Leave: Annual leave for routine women\'s health checkups. Appointment proof required.',
+    sick:'🏥 Sick leave: inform supervisor by 9 AM. Doctor cert for 3+ days.',
+    casual:'🌴 Casual leave: 24hr advance notice preferred.',
+    earned:'💼 Earned leave: 1 month advance notice recommended.',
+  };
+  const pn=document.getElementById('policyNote2');
+  if(notes[t]){pn.style.display='';pn.textContent=notes[t];}else pn.style.display='none';
+  document.getElementById('applyPolicyNote').textContent=notes[t]||'';
+
+  // gender guard
+  if(t==='maternity'&&cu.gender!=='F'){toast('Maternity only for female employees','error','❌');document.getElementById('aType').value='casual';onTypeChange();return;}
+  if(t==='paternity'&&cu.gender==='F'){toast('Paternity only for male employees','error','❌');document.getElementById('aType').value='casual';onTypeChange();return;}
+  if(['childcare','womenhealth','menstrual','fertility','menopause','domestic_violence','wellness_check'].includes(t)&&cu.gender!=='F'){toast('This leave is for female employees only','error','❌');document.getElementById('aType').value='casual';onTypeChange();return;}
+}
+
+async function submitApp(data){
+  const d=data||{type:document.getElementById('aType').value,from:document.getElementById('aFrom').value,to:document.getElementById('aTo').value,reason:document.getElementById('aReason').value};
+  if(!d.from||!d.to){toast('Please select dates','error','❌');return false;}
+  const days=Math.max(1,Math.round((new Date(d.to)-new Date(d.from))/(864e5))+1);
+  const bid=`${cu.id}_${d.type}`;
+  const bal=await get('leave_balances',bid);
+  if(bal&&bal.remaining<days){toast(`Insufficient balance! ${bal.remaining} days left`,'error','⚠️');return false;}
+  const app={empId:cu.id,type:d.type,fromDate:d.from,toDate:d.to,days,reason:d.reason||'Applied via AI Voice',status:'pending',appliedOn:new Date().toISOString().split('T')[0],approvedBy:null};
+  await put('applications',app);
+  await put('audit_log',{action:'APPLY',detail:`${cu.id} applied ${d.type} for ${d.from}`,timestamp:new Date().toISOString(),user:cu.id});
+  toast(`${lbl(d.type)} submitted! Pending approval.`,'success','✅');
+  if(!data){clearForm();renderApplyBal();}
+  renderDash();
+  return true;
+}
+
+function clearForm(){
+  const t=new Date().toISOString().split('T')[0];
+  document.getElementById('aFrom').value=t;document.getElementById('aTo').value=t;
+  document.getElementById('aReason').value='';document.getElementById('aType').value='wfh';onTypeChange();
+}
+
+// ── SMART RE-APPLY AFTER REJECTION ──
+async function smartReapply(appId){
+  const app=await get('applications',appId);
+  if(!app){toast('Application not found','error','❌');return;}
+  const rejReason=app.rejectionReason||'';
+  const t=rejReason.toLowerCase();
+
+  // Build smart suggestion based on rejection reason
+  let suggestion='';
+  let altType=null;
+
+  if(t.includes('balance')||t.includes('insufficient')){
+    suggestion='Your previous leave balance was insufficient. Consider applying for a different leave type or fewer days.';
+    // suggest an alternative with balance
+    const bals=await getAll('leave_balances');
+    const myBals=bals.filter(b=>b.empId===cu.id&&b.remaining>0&&b.type!==app.type);
+    if(myBals.length){altType=myBals.sort((a,b)=>b.remaining-a.remaining)[0].type;}
+  } else if(t.includes('deadline')||t.includes('project')||t.includes('critical')){
+    suggestion='The rejection was due to project commitments. Try reapplying for a different date or consider WFH instead of full leave.';
+    altType='wfh';
+  } else if(t.includes('notice')||t.includes('advance')){
+    suggestion='Apply with more advance notice (at least 24-48 hours for casual, 1 month for earned leave).';
+    altType=app.type;
+  } else if(t.includes('consecutive')||t.includes('days')){
+    suggestion='Consider splitting the leave into smaller segments (max 3 consecutive for casual leave).';
+    altType=app.type;
+  } else {
+    suggestion='Try reapplying with a more detailed reason or choosing an alternative leave type.';
+    altType=app.type||'casual';
+  }
+
+  // Show a modal-like toast with guidance and pre-fill the form
+  const suggestHtml=`
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;display:flex;align-items:center;justify-content:center" id="reapplyOverlay">
+      <div style="background:var(--s1);border:1px solid var(--b2);border-radius:18px;padding:28px;max-width:480px;width:90%;position:relative">
+        <div style="font-family:var(--ff);font-size:18px;font-weight:700;margin-bottom:6px">💡 Smart Re-apply Suggestion</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:16px">For your ${lbl(app.type)} request (${app.fromDate})</div>
+        
+        <div style="padding:12px 14px;background:rgba(247,129,102,.08);border:1px solid rgba(247,129,102,.2);border-radius:10px;margin-bottom:14px">
+          <div style="font-size:11px;color:var(--a2);font-weight:600;margin-bottom:4px">❌ Original Rejection Reason</div>
+          <div style="font-size:13px;color:var(--t)">${rejReason}</div>
+        </div>
+        
+        <div style="padding:12px 14px;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.2);border-radius:10px;margin-bottom:18px">
+          <div style="font-size:11px;color:var(--a);font-weight:600;margin-bottom:4px">💡 AI Recommendation</div>
+          <div style="font-size:13px;color:var(--t);line-height:1.6">${suggestion}</div>
+          ${altType&&altType!==app.type?`<div style="margin-top:8px;font-size:12px;color:var(--a4)">Suggested alternative: <strong>${lbl(altType)}</strong></div>`:''}
+        </div>
+        
+        <div style="display:flex;gap:10px">
+          <button onclick="document.getElementById('reapplyOverlay').remove()" style="flex:1;padding:11px;background:none;border:1px solid var(--b);border-radius:9px;color:var(--t2);font-family:var(--fb);cursor:pointer">Cancel</button>
+          ${altType&&altType!==app.type?`<button onclick="prefillReapply('${altType}','${(app.reason||'').replace(/'/g,"\\'")}');document.getElementById('reapplyOverlay').remove()" style="flex:1;padding:11px;background:linear-gradient(135deg,var(--a4),#a855f7);border:none;border-radius:9px;color:#fff;font-family:var(--fb);font-weight:600;cursor:pointer">Try ${lbl(altType)}</button>`:''}
+          <button onclick="prefillReapply('${app.type}','${(app.reason||'').replace(/'/g,"\\'")}');document.getElementById('reapplyOverlay').remove()" style="flex:1;padding:11px;background:linear-gradient(135deg,var(--a),#4c9eff);border:none;border-radius:9px;color:#fff;font-family:var(--fb);font-weight:600;cursor:pointer">Re-apply ${lbl(app.type)}</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend',suggestHtml);
+  speak('I have a smart suggestion for your rejected leave. Please review the recommendation.');
+}
+
+function prefillReapply(type,reason){
+  const t=today();
+  document.getElementById('aType').value=type;
+  document.getElementById('aFrom').value=t;
+  document.getElementById('aTo').value=t;
+  document.getElementById('aReason').value=reason;
+  onTypeChange();goSec('apply');
+  toast(`Form pre-filled with suggestion. Adjust dates & submit!`,'success','💡');
+}
+
+// ── DATABASE VIEW ──
+async function showDbTbl(name,el){
+  if(el){document.querySelectorAll('.db-tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');}
+  const sqlMap={
+    employees:'SELECT id, name, dept, gender, role, wfhTotal, wfhUsed, status FROM employees;',
+    applications:'SELECT id, empId, type, fromDate, toDate, days, status, appliedOn, approvedBy FROM applications ORDER BY id DESC;',
+    leave_balances:'SELECT id, empId, type, total, used, remaining FROM leave_balances;',
+    policies:'SELECT id, name, type, applicableTo, days, unit FROM policies;',
+    audit_log:'SELECT id, action, detail, timestamp, user FROM audit_log ORDER BY id DESC LIMIT 50;',
+  };
+  document.getElementById('dbSqlPreview').textContent=`-- ${sqlMap[name]||'SELECT * FROM '+name+';'}`;
+  const data=await getAll(name);
+  document.getElementById('dbRecCount').textContent=`📊 ${data.length} record${data.length!==1?'s':''} in table "${name}"`;
+  if(!data.length){document.getElementById('dbTableView').innerHTML='<p style="padding:20px;color:var(--t3)">No records found</p>';return;}
+  const keys=Object.keys(data[0]);
+  document.getElementById('dbTableView').innerHTML=`<div class="tw"><table>
+    <thead><tr>${keys.map(k=>`<th>${k}</th>`).join('')}</tr></thead>
+    <tbody>${data.slice(0,200).map(r=>`<tr>${keys.map(k=>`<td style="font-family:var(--fm);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r[k]??''}">${r[k]??'—'}</td>`).join('')}</tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function refreshDb(){showDbTbl(document.querySelector('.db-tab.on')?.textContent?.replace(/📋\s*/,'').trim()||'employees',null);}
+
+// ══════════════════════════════
+//  VOICE ENGINE (FULL)
+// ══════════════════════════════
+let SR=null,loginRec_=null,appRec_=null,advRec_=null;
+let advListening=false;
+
+function setupSR(){
+  if(!('webkitSpeechRecognition'in window||'SpeechRecognition'in window)) return;
+  const S=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+  loginRec_=new S();loginRec_.continuous=false;loginRec_.interimResults=true;loginRec_.lang='en-IN';
+  loginRec_.onresult=e=>{
+    const t=Array.from(e.results).map(r=>r[0].transcript).join('');
+    document.getElementById('loginTranscript').textContent=t;
+    document.getElementById('loginTranscript').classList.add('has-text');
+    if(e.results[0].isFinal) handleLoginVoice(t);
+  };
+  loginRec_.onend=()=>stopLoginVoice();
+  loginRec_.onerror=()=>stopLoginVoice();
+
+  appRec_=new S();appRec_.continuous=false;appRec_.interimResults=true;appRec_.lang='en-IN';
+  appRec_.onresult=e=>{
+    const t=Array.from(e.results).map(r=>r[0].transcript).join('');
+    document.getElementById('appTranscript').textContent=t;
+    document.getElementById('appTranscript').classList.add('has-text');
+    showVoiceBar(t,'Listening...');
+    if(e.results[0].isFinal) processAppCmd(t);
+  };
+  appRec_.onend=()=>stopAppVoice();
+  appRec_.onerror=()=>stopAppVoice();
+
+  // Advisor voice recognition
+  advRec_=new S();advRec_.continuous=false;advRec_.interimResults=true;advRec_.lang='en-IN';
+  advRec_.onresult=e=>{
+    const t=Array.from(e.results).map(r=>r[0].transcript).join('');
+    document.getElementById('advReason').value=t;
+    if(e.results[0].isFinal){stopAdvVoice();toast('Voice captured! Click Analyze to get suggestions.','success','🎙️');}
+  };
+  advRec_.onend=()=>stopAdvVoice();
+  advRec_.onerror=()=>stopAdvVoice();
+}
+
+// ADVISOR VOICE
+function toggleAdvVoice(){advListening?stopAdvVoice():startAdvVoice();}
+function startAdvVoice(){
+  if(!advRec_){toast('Mic not available in this browser','error','❌');return;}
+  advListening=true;
+  document.getElementById('advVoiceBtn').style.borderColor='var(--a)';
+  document.getElementById('advVoiceBtn').style.background='rgba(88,166,255,.18)';
+  document.getElementById('advVoiceBtnIcon').textContent='⏹';
+  document.getElementById('advVoiceBtnTxt').textContent='Listening... tap to stop';
+  activateWave('advWave');
+  try{advRec_.start();}catch(e){}
+}
+function stopAdvVoice(){
+  advListening=false;
+  const btn=document.getElementById('advVoiceBtn');
+  if(btn){btn.style.borderColor='';btn.style.background='';}
+  const icon=document.getElementById('advVoiceBtnIcon');if(icon)icon.textContent='🎙️';
+  const txt=document.getElementById('advVoiceBtnTxt');if(txt)txt.textContent='Speak your situation';
+  deactivateWave('advWave');
+  try{advRec_.stop();}catch(e){}
+}
+
+// LOGIN VOICE
+function toggleLoginVoice(){loginListening?stopLoginVoice():startLoginVoice();}
+function startLoginVoice(){
+  if(!loginRec_){toast('Mic not available','error','❌');return;}
+  loginListening=true;
+  const orb=document.getElementById('loginOrb');orb.classList.add('listening');
+  document.getElementById('loginOrbIcon').textContent='⏹';
+  document.getElementById('loginOrbStatus').textContent='🔴 Listening... say your credentials';
+  activateWave('loginWave');
+  document.getElementById('loginTranscript').innerHTML='<span class="transcript-placeholder">Listening...</span>';
+  try{loginRec_.start();}catch(e){}
+}
+function stopLoginVoice(){
+  loginListening=false;
+  document.getElementById('loginOrb').classList.remove('listening');
+  document.getElementById('loginOrbIcon').textContent='🎙️';
+  document.getElementById('loginOrbStatus').textContent='Tap orb to try again';
+  deactivateWave('loginWave');
+  try{loginRec_.stop();}catch(e){}
+}
+
+async function handleLoginVoice(text){
+  stopLoginVoice();
+  const t=text.toLowerCase();
+
+  // Name → EMP ID mapping
+  const nameMap={
+    'priya':'EMP001','priya sharma':'EMP001',
+    'rahul':'EMP002','rahul kumar':'EMP002',
+    'anita':'EMP003','anita desai':'EMP003','hr':'EMP003',
+    'kavya':'EMP004','kavya nair':'EMP004',
+    'deepa':'EMP005','deepa menon':'EMP005',
+    'arjun':'EMP006','arjun mehta':'EMP006',
+    'sunita':'EMP007','sunita rao':'EMP007',
+    'meena':'EMP008','meena pillai':'EMP008',
+    'admin':'ADM001',
+  };
+
+  let id=null,pw=null;
+
+  // Pattern 1: "login [as] <name> password <pw>" or "login [as] <name> <pw>"
+  const m1=text.match(/(?:login|sign in|log in)\s+(?:as|with)?\s*([a-z\s]+?)\s+(?:password|pass|pw|passcode)?\s*([a-z0-9]+)\s*$/i);
+  if(m1){
+    const rawName=m1[1].trim().toLowerCase();
+    const rawPw=m1[2].trim();
+    id=nameMap[rawName]||rawName.toUpperCase();
+    pw=rawPw;
+  }
+
+  // Pattern 2: bare "<name> <password>" (2 words)
+  if(!id){
+    const m2=text.trim().match(/^([a-z]+(?:\s+[a-z]+)?)\s+([a-z0-9]+)$/i);
+    if(m2){
+      const rawName=m2[1].trim().toLowerCase();
+      id=nameMap[rawName]||rawName.toUpperCase();
+      pw=m2[2].trim();
+    }
+  }
+
+  // Pattern 3: EMP ID style fallback "EMP001 pass123"
+  if(!id){
+    const m3=text.match(/([A-Z]{2,4}\d{3})\s+([a-z0-9]+)/i);
+    if(m3){id=m3[1].toUpperCase();pw=m3[2];}
+  }
+
+  // Named shortcuts (name only, auto-password)
+  if(!id){
+    for(const [name,empId] of Object.entries(nameMap)){
+      if(t.includes(name)){id=empId;pw='pass123';if(id==='ADM001')pw='admin123';break;}
+    }
+  }
+
+  if(id&&pw){
+    setLoginReply(`Logging in as ${id}...`);
+    speak(`Logging in as ${id}`);
+    const ok=await tryLogin(id,pw,'voice');
+    if(!ok) setLoginReply('Login failed. Please check your name and password and try again.');
+  } else {
+    const msg="I didn't catch that. Say your name and password — for example: 'Priya pass123' or 'Login Anita password pass123'.";
+    setLoginReply(msg);speak(msg);
+  }
+}
+
+function setLoginReply(text){
+  const el=document.getElementById('loginReply');
+  el.textContent=text;el.classList.add('show');
+}
+
+// APP VOICE
+function toggleAppVoice(){appListening?stopAppVoice():startAppVoice();}
+function startAppVoice(){
+  if(!appRec_){toast('Mic not available. Use text input.','error','❌');return;}
+  appListening=true;
+  const orb=document.getElementById('appOrb');orb.classList.add('listening');
+  document.getElementById('appOrbIcon').textContent='⏹';
+  document.getElementById('appVoiceStatus').textContent='🔴 Listening... speak your command!';
+  document.getElementById('miniVoiceBtn').classList.add('on');
+  document.getElementById('miniVoiceIcon').textContent='⏹';
+  document.getElementById('miniVoiceText').textContent='Stop Listening';
+  activateWave('appWave');
+  showVoiceBar('','Listening... speak now!');
+  try{appRec_.start();}catch(e){}
+}
+function stopAppVoice(){
+  appListening=false;
+  const orb=document.getElementById('appOrb');orb.classList.remove('listening');
+  document.getElementById('appOrbIcon').textContent='🎙️';
+  document.getElementById('appVoiceStatus').textContent='Click orb to activate — say anything!';
+  document.getElementById('miniVoiceBtn').classList.remove('on');
+  document.getElementById('miniVoiceIcon').textContent='🎙️';
+  document.getElementById('miniVoiceText').textContent='Voice Command';
+  deactivateWave('appWave');
+  hideVoiceBar();
+  try{appRec_.stop();}catch(e){}
+}
+
+function runTextCmd(){const v=document.getElementById('txtCmd').value.trim();if(v){processAppCmd(v);document.getElementById('txtCmd').value='';}}
+
+// ══════════════════════════════
+//  VOICE COMMAND INTERPRETER
+// ══════════════════════════════
+async function processAppCmd(raw){
+  const text=raw.trim();
+  const t=text.toLowerCase();
+  addBubble(text,'user');
+
+  // Update transcript
+  document.getElementById('appTranscript').textContent=text;
+  document.getElementById('appTranscript').classList.add('has-text');
+  showVoiceBar(text,'Processing...');
+  document.getElementById('appVoiceStatus').textContent='Processing...';
+
+  let reply='';
+
+  // ── NAVIGATION ──
+  if(t.match(/go to|open|show|navigate to|take me to/)){
+    if(t.includes('dashboard')){goSec('dashboard');reply='Opening your dashboard!';}
+    else if(t.includes('voice')){goSec('voice');reply='Voice assistant ready!';}
+    else if(t.includes('apply')||t.includes('application form')){goSec('apply');reply='Opening the application form!';}
+    else if(t.includes('history')||t.includes('my leaves')||t.includes('my wfh')){goSec('myleaves');reply='Showing your leave and WFH history!';}
+    else if(t.includes('approval')){goSec('approvals');reply='Opening approvals section!';}
+    else if(t.includes('employee')){goSec('employees');reply='Showing employee directory!';}
+    else if(t.includes('polic')){goSec('policies');reply='Here are all the policies!';}
+    else if(t.includes('report')){goSec('reports');reply='Opening reports and analytics!';}
+    else if(t.includes('database')||t.includes('db')){goSec('db');reply='Opening live database view! You can see all tables here.';}
+  }
+
+  // ── LOGOUT ──
+  else if(t.includes('logout')||t.includes('log out')||t.includes('sign out')){
+    reply=`Goodbye ${cu.name.split(' ')[0]}! Logging you out...`;
+    addBubble(reply,'ai');speak(reply);setTimeout(logout,1500);return;
+  }
+
+  // ── WHO AM I ──
+  else if(t.includes('who am i')||t.includes('my profile')){
+    reply=`You are ${cu.name}, ${cu.designation} in the ${cu.dept} department. Your role is ${cu.role}.`;
+  }
+
+  // ── DATE ──
+  else if(t.includes('today')&&(t.includes('date')||t.includes('day'))){
+    reply=`Today is ${new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}.`;
+  }
+
+  // ── BALANCE QUERIES ──
+  else if(t.includes('balance')||t.includes('how many')||t.includes('days left')||t.includes('remaining')){
+    const bals=await getAll('leave_balances');const mb=bals.filter(b=>b.empId===cu.id);
+    if(t.includes('wfh')||t.includes('work from home')){
+      const b=mb.find(x=>x.type==='wfh');
+      reply=`You have ${b?.remaining??0} WFH days remaining out of ${b?.total??0} total for this month.`;
+    } else if(t.includes('sick')){
+      const b=mb.find(x=>x.type==='sick');
+      reply=`You have ${b?.remaining??0} sick leave days remaining out of ${b?.total??0}.`;
+    } else if(t.includes('casual')){
+      const b=mb.find(x=>x.type==='casual');
+      reply=`You have ${b?.remaining??0} casual leave days remaining out of ${b?.total??0}.`;
+    } else if(t.includes('maternity')){
+      const b=mb.find(x=>x.type==='maternity');
+      reply=b?`You have ${b.remaining} maternity leave days available (out of ${b.total}).`:`Maternity leave is not applicable for your profile.`;
+    } else {
+      reply=`Your leave balances: ${mb.map(b=>`${lbl(b.type)}: ${b.remaining}/${b.total}`).join(', ')}.`;
+    }
+    goSec('dashboard');
+  }
+
+  // ── APPLY WFH ──
+  else if(t.includes('wfh')||t.includes('work from home')){
+    const date=extractDate(t);
+    const days=extractDays(t);
+    const from=date||today();
+    const to=days>1?addDays(from,days-1):from;
+    const ok=await submitApp({type:'wfh',from,to,reason:'Applied via AI Voice Assistant'});
+    if(ok){
+      reply=`Done! WFH applied for ${from}${from!==to?` to ${to}`:''}. Status: Pending approval. ${cu.gender==='F'?'Using your Women\'s Flexibility Policy.':''}`;
+      goSec('dashboard');
+    } else reply='Could not apply WFH. Please check your balance.';
+  }
+
+  // ── SICK LEAVE ──
+  else if(t.includes('sick')){
+    const date=extractDate(t)||today();
+    const ok=await submitApp({type:'sick',from:date,to:date,reason:'Not feeling well - applied via AI Voice'});
+    reply=ok?`Sick leave applied for ${date}. Please get well soon! 🏥 If 3+ days, submit a doctor's certificate.`:'Could not apply. Check balance.';
+    if(ok) goSec('dashboard');
+  }
+
+  // ── CASUAL LEAVE ──
+  else if(t.includes('casual')){
+    const date=extractDate(t)||today();
+    const ok=await submitApp({type:'casual',from:date,to:date,reason:'Personal work - AI Voice'});
+    reply=ok?`Casual leave applied for ${date}. Pending approval!`:'Could not apply. Check balance.';
+    if(ok) goSec('dashboard');
+  }
+
+  // ── MATERNITY ──
+  else if(t.includes('maternity')){
+    if(cu.gender!=='F'){reply='Maternity leave is only for female employees.';}
+    else{
+      const bal=await get('leave_balances',`${cu.id}_maternity`);
+      reply=`You have ${bal?.remaining??180} maternity leave days. To apply, I'll open the form for you!`;
+      goSec('apply');document.getElementById('aType').value='maternity';onTypeChange();
+    }
+  }
+
+  // ── PATERNITY ──
+  else if(t.includes('paternity')){
+    if(cu.gender==='F'){reply='Paternity leave is only for male employees.';}
+    else{
+      reply='Opening paternity leave form!';
+      goSec('apply');document.getElementById('aType').value='paternity';onTypeChange();
+    }
+  }
+
+  // ── CHILDCARE ──
+  else if(t.includes('child care')||t.includes('childcare')){
+    if(cu.gender!=='F'){reply='Child Care Leave is primarily for female employees.';}
+    else{
+      const bal=await get('leave_balances',`${cu.id}_childcare`);
+      reply=`You have ${bal?.remaining??730} child care leave days (lifetime total). Opening form!`;
+      goSec('apply');document.getElementById('aType').value='childcare';onTypeChange();
+    }
+  }
+
+  // ── WOMEN'S HEALTH ──
+  else if(t.includes('women')&&(t.includes('health')||t.includes('personal'))){
+    if(cu.gender!=='F'){reply="Women's health leave is for female employees only.";}
+    else{
+      const date=extractDate(t)||today();
+      const ok=await submitApp({type:'womenhealth',from:date,to:date,reason:'Personal health - confidential'});
+      reply=ok?`Women's health leave applied for ${date}. This is fully confidential!`:'Could not apply.';
+      if(ok) goSec('dashboard');
+    }
+  }
+
+  // ── EARNED LEAVE ──
+  else if(t.includes('earned')){
+    reply='Opening earned leave form!';goSec('apply');document.getElementById('aType').value='earned';onTypeChange();
+  }
+
+  // ── SHOW HISTORY ──
+  else if(t.includes('history')||t.includes('my applications')||t.includes('my leaves')){
+    goSec('myleaves');reply='Showing your complete leave and WFH history!';
+  }
+
+  // ── APPROVALS (HR) ──
+  else if(t.includes('pending approval')||t.includes('show approvals')){
+    if(!['admin','hr'].includes(cu.role)){reply='You do not have approval privileges.';}
+    else{goSec('approvals');const apps=await getAll('applications');const p=apps.filter(a=>a.status==='pending');reply=`There are ${p.length} pending approvals.`;}
+  }
+
+  else if((t.includes('approve all')||t.includes('approve everything'))&&['admin','hr'].includes(cu.role)){
+    const apps=await getAll('applications');
+    const pend=apps.filter(a=>a.status==='pending');
+    for(const app of pend){
+      app.status='approved';app.approvedBy=cu.id;app.actionDate=new Date().toISOString().split('T')[0];
+      await put('applications',app);
+      const bid=`${app.empId}_${app.type}`;const bal=await get('leave_balances',bid);
+      if(bal){bal.used+=app.days;bal.remaining=Math.max(0,bal.remaining-app.days);await put('leave_balances',bal);}
+    }
+    reply=`All ${pend.length} pending applications have been approved!`;
+    goSec('approvals');renderApprovals();
+  }
+
+  // ── POLICIES ──
+  else if(t.includes('polic')){
+    goSec('policies');
+    const extras=cu.gender==='F'?'As a female employee, you have: Women\'s Flexibility WFH (16 days/month), Maternity (180 days), Child Care (2 years), Women\'s Health (12 days/year).':'';
+    reply=`Here are all company policies! ${extras}`;
+  }
+
+  // ── REPORTS ──
+  else if(t.includes('report')||t.includes('analytics')){
+    goSec('reports');reply='Opening reports and analytics!';
+  }
+
+  // ── DATABASE ──
+  else if(t.includes('database')||t.includes('db')||t.includes('data')){
+    goSec('db');reply='Opening the live database! You can see all records in all tables — employees, applications, leave balances, policies, and audit logs.';
+    showDbTbl('employees',null);
+  }
+
+  // ── GREET ──
+  else if(t.match(/^(hi|hello|hey|good\s*(morning|afternoon|evening))/)){
+    const h=new Date().getHours();const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+    reply=`${g} ${cu.name.split(' ')[0]}! I can apply WFH, sick leave, casual leave, check balances, navigate pages, or show reports. What would you like?`;
+  }
+
+  // ── FALLBACK ──
+  else{
+    reply=`I heard: "${text}". I can help with: apply WFH/leave, check balance, show history, approvals, policies, reports, or navigate. Try "apply WFH for tomorrow" or "check my balance"!`;
+  }
+
+  if(!reply) reply='Done!';
+  addBubble(reply,'ai');showVoiceReply(reply);speak(reply);
+  showVoiceBar(text,reply);
+  setTimeout(hideVoiceBar,4000);
+  document.getElementById('appVoiceStatus').textContent='Ready — say another command!';
+}
+
+// ── DATE UTILS ──
+function today(){return new Date().toISOString().split('T')[0]}
+function addDays(d,n){const dt=new Date(d);dt.setDate(dt.getDate()+n);return dt.toISOString().split('T')[0]}
+function extractDate(t){
+  const td=today();
+  if(t.includes('tomorrow')){return addDays(td,1);}
+  if(t.includes('day after tomorrow')){return addDays(td,2);}
+  if(t.includes('next monday')||t.includes('this monday')||t.includes('monday')){return nextWeekday(1);}
+  if(t.includes('tuesday')){return nextWeekday(2);}
+  if(t.includes('wednesday')){return nextWeekday(3);}
+  if(t.includes('thursday')){return nextWeekday(4);}
+  if(t.includes('friday')){return nextWeekday(5);}
+  if(t.includes('today')) return td;
+  return null;
+}
+function extractDays(t){
+  const m=t.match(/(\d+)\s*day/);return m?parseInt(m[1]):1;
+}
+function nextWeekday(target){
+  const d=new Date();const day=d.getDay();const diff=(target-day+7)%7||7;
+  d.setDate(d.getDate()+diff);return d.toISOString().split('T')[0];
+}
+
+// ── VOICE BAR ──
+function showVoiceBar(text,status){
+  const bar=document.getElementById('voiceBar');bar.style.display='flex';
+  document.getElementById('vbarText').textContent=text;document.getElementById('vbarStatus').textContent=status;
+}
+function hideVoiceBar(){document.getElementById('voiceBar').style.display='none';}
+
+// ── VOICE REPLY ──
+function showVoiceReply(text){
+  const el=document.getElementById('appReply');el.textContent='🤖 '+text;el.classList.add('show');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),6000);
+}
+
+// ── CONV BUBBLES ──
+function addBubble(text,type){
+  const wrap=document.getElementById('convWrap');
+  const d=document.createElement('div');
+  d.className=`bubble bubble-${type}`;
+  const time=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  d.innerHTML=`<span style="font-size:10px;color:var(--t3);display:block;margin-bottom:4px">${time} — ${type==='user'?'You':'AI'}</span>${text}`;
+  wrap.appendChild(d);wrap.scrollTop=wrap.scrollHeight;
+}
+function clearConv(){document.getElementById('convWrap').innerHTML='<div class="bubble bubble-sys">👋 Conversation cleared. Ready for new commands!</div>';}
+
+// ── WAVEFORM ──
+function activateWave(id){document.querySelectorAll(`#${id} .wave-bar`).forEach(b=>b.classList.add('active'));}
+function deactivateWave(id){document.querySelectorAll(`#${id} .wave-bar`).forEach(b=>b.classList.remove('active'));}
+
+// ── TTS ──
+function speak(text){
+  if(!('speechSynthesis'in window)) return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text.replace(/[🏠📋💰🎙️✅❌⚠️🤱👶♀️👨‍👶🌴🏥💼📅]/g,''));
+  u.rate=1.08;u.pitch=1.05;u.volume=1;
+  const voices=window.speechSynthesis.getVoices();
+  const v=voices.find(x=>x.lang.startsWith('en')&&(x.name.includes('Female')||x.name.includes('Google')||x.name.includes('Samantha')))||voices[0];
+  if(v) u.voice=v;
+  u.onstart=()=>{document.getElementById('appOrb')?.classList.add('speaking')};
+  u.onend=()=>{document.getElementById('appOrb')?.classList.remove('speaking')};
+  window.speechSynthesis.speak(u);
+}
+
+// ── HELPERS ──
+function lbl(t){const m={wfh:'🏠 WFH',casual:'🌴 Casual',sick:'🏥 Sick',earned:'💼 Earned',maternity:'🤱 Maternity',paternity:'👨‍👶 Paternity',childcare:'👶 Childcare',womenhealth:'♀️ Women\'s Health',prenatal:'🤰 Prenatal',menstrual:'🌸 Menstrual Wellness',fertility:'💗 Fertility Treatment',menopause:'🌺 Menopause Support',domestic_violence:'🛡️ DV Support',wellness_check:'🩺 Wellness Check'};return m[t]||t;}
+function bClass(s){return{approved:'ba',pending:'bp',rejected:'br',active:'bc',wfh:'bw'}[s]||'bc';}
+function toast(msg,type='success',icon='✅'){
+  const t=document.getElementById('toast');
+  document.getElementById('tMsg').textContent=msg;document.getElementById('tIcon').textContent=icon;
+  t.style.borderColor=type==='success'?'rgba(63,185,80,.3)':type==='error'?'rgba(247,129,102,.3)':'rgba(88,166,255,.3)';
+  t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),4500);
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ── BOOT ──
+(async()=>{
+  await idb();await seed();setupSR();
+  if('speechSynthesis'in window){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();}
+  console.log(`
+╔══════════════════════════════════════════════╗
+║      AURA-MIRA — DATABASE DETAILS            ║
+╠══════════════════════════════════════════════╣
+║ DB Name:    AuraMiraDB                       ║
+║ DB Type:    IndexedDB (Browser Persistent)   ║
+╠══════════════════════════════════════════════╣
+║ Tables:                                      ║
+║  employees       · 9 records                 ║
+║  applications    · 10 records                ║
+║  leave_balances  · auto per employee         ║
+║  policies        · 20 policies               ║
+║  audit_log       · auto tracked              ║
+╠══════════════════════════════════════════════╣
+║ VOICE LOGIN: Say "Priya pass123"             ║
+║ VOICE WFH:   Say "Apply WFH for tomorrow"    ║
+║ VOICE NAV:   Say "Open database"             ║
+╚══════════════════════════════════════════════╝`);
+  // Greet on load
+  setTimeout(()=>speak('Welcome to Aura-Mira, your voice-first women\'s wellbeing and leave management platform. Say your name and password to login, or use the buttons below.'),800);
+})();
+
+document.getElementById('aFrom').addEventListener('change',function(){
+  if(document.getElementById('aTo').value<this.value) document.getElementById('aTo').value=this.value;
+});
+
+
+// ══════════════════════════════════════════════════════════
+//  AI LEAVE ADVISOR MODULE
+//  Uses Anthropic API to analyze the user's free-text reason,
+//  checks their real-time balance & applicable policies,
+//  and returns ranked suggestions with one-click apply.
+// ══════════════════════════════════════════════════════════
+
+let advHistory = [];  // in-memory query history
+
+// ── RENDER ADVISOR SIDE PANELS ──
+async function renderAdvisor() {
+  if (!cu) return;
+  const bals = await getAll('leave_balances');
+  const myBals = bals.filter(b => b.empId === cu.id);
+  const pols = await getAll('policies');
+
+  // Balance panel
+  document.getElementById('advBalPanel').innerHTML = myBals.length
+    ? myBals.map(b => `
+        <div class="bi">
+          <span class="bi-l">${lbl(b.type)}</span>
+          <span class="bi-r ${b.remaining === 0 ? 'low' : b.remaining < 3 ? 'low' : ''}"
+                style="${b.remaining === 0 ? 'color:var(--a2)' : ''}">
+            ${b.remaining}<span style="color:var(--t3);font-size:10px">/${b.total}</span>
+          </span>
+        </div>`).join('')
+    : '<div style="color:var(--t3)">No balance data found</div>';
+
+  // Policy panel – show only policies applicable to this user
+  const applicablePols = pols.filter(p =>
+    p.applicableTo === 'all' ||
+    p.applicableTo === cu.gender ||
+    p.applicableTo === cu.dept
+  );
+  document.getElementById('advPolicyPanel').innerHTML = applicablePols
+    .map(p => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--b)">
+        <span style="color:var(--t)">${p.name}</span>
+        <span style="font-family:var(--fm);font-size:11px;color:${p.color||'var(--a)'}">
+          ${p.days} ${p.unit}
+        </span>
+      </div>`).join('') + `
+      <div style="margin-top:8px;font-size:11px;color:var(--t3)">
+        ${cu.gender === 'F' ? '&#9792;&#65039; Enhanced female entitlements applied' : '&#9794;&#65039; Standard entitlements applied'}
+      </div>`;
+}
+
+// ── FILL EXAMPLE REASON ──
+function fillAdvReason(text) {
+  document.getElementById('advReason').value = text;
+  document.getElementById('advReason').focus();
+}
+
+// ── MAIN ADVISOR FUNCTION ──
+async function runAdvisor() {
+  const reason = document.getElementById('advReason').value.trim();
+  if (!reason) { toast('Please describe your reason first', 'error', '&#x26A0;&#xFE0F;'); return; }
+
+  // Fetch current state from DB
+  const bals = await getAll('leave_balances');
+  const myBals = bals.filter(b => b.empId === cu.id);
+  const pols = await getAll('policies');
+  const applicablePols = pols.filter(p =>
+    p.applicableTo === 'all' ||
+    p.applicableTo === cu.gender ||
+    p.applicableTo === cu.dept
+  );
+  const apps = await getAll('applications');
+  const myApps = apps.filter(a => a.empId === cu.id);
+  const recentApps = myApps.sort((a,b) => b.id - a.id).slice(0, 5);
+
+  // Build rich context for the AI
+  const balanceContext = myBals.map(b =>
+    `${lbl(b.type).replace(/[^\x20-\x7E]/g,'').trim()}: ${b.remaining} of ${b.total} remaining`
+  ).join('\n');
+
+  const policyContext = applicablePols.map(p =>
+    `- ${p.name} (${p.type}): ${p.days} ${p.unit} | Applicable to: ${p.applicableTo} | ${p.description}`
+  ).join('\n');
+
+  const recentContext = recentApps.length
+    ? recentApps.map(a => `${a.type} from ${a.fromDate} to ${a.toDate} - ${a.status}`).join('\n')
+    : 'No recent applications';
+
+  const systemPrompt = `You are Aura-Mira AI Leave Advisor, an intelligent HR assistant embedded in a women-first leave management system focused on women's wellbeing, health, and work-life balance. Your job is to analyze an employee's reason for needing time off and suggest the most suitable leave or WFH options available to them.
+
+EMPLOYEE PROFILE:
+- Name: ${cu.name}
+- Employee ID: ${cu.id}
+- Department: ${cu.dept}
+- Designation: ${cu.designation}
+- Gender: ${cu.gender === 'F' ? 'Female' : 'Male'}
+- Role: ${cu.role}
+
+CURRENT LEAVE BALANCES:
+${balanceContext}
+
+APPLICABLE POLICIES FOR THIS EMPLOYEE:
+${policyContext}
+
+RECENT APPLICATIONS (last 5):
+${recentContext}
+
+TODAY'S DATE: ${new Date().toLocaleDateString('en-IN', {weekday:'long', year:'numeric', month:'long', day:'numeric'})}
+
+TASK: Based on the employee's stated reason, suggest the most suitable leave/WFH options. Consider:
+1. What type of leave best fits the reason (e.g., fever = sick leave, home visit = WFH or casual, vacation = earned/casual)
+2. Whether the employee actually HAS enough balance remaining
+3. For FEMALE employees: check women-specific entitlements first — Women's Health Leave, Menstrual Wellness Leave, Fertility Treatment Leave, Menopause Support Leave, Maternity, Prenatal, Child Care Leave, Domestic Violence Leave, Wellness Check Leave, Milk Break
+4. Be sensitive and empathetic especially for women's health-related reasons — these are confidential
+5. Whether WFH is a valid alternative to full leave
+6. Policy conditions and requirements
+7. If the reason relates to emotional distress, personal safety, or women's health, recommend relevant confidential leave types with reassurance
+
+Respond ONLY with a valid JSON object. No markdown fences, no explanation text. The JSON format is:
+
+{
+  "summary": "2-3 sentence warm, empathetic plain-language summary of your analysis and recommendation",
+  "suggestions": [
+    {
+      "type": "leave_type_code",
+      "label": "Human readable leave name with emoji",
+      "rank": 1,
+      "rankLabel": "Best Match",
+      "available": true,
+      "balanceRemaining": 12,
+      "balanceTotal": 15,
+      "whyGood": "1-2 sentence explanation of why this is a good fit for their stated reason",
+      "conditions": ["key condition 1", "key condition 2"],
+      "canApply": true,
+      "canApplyReason": "null or reason why they cannot apply"
+    }
+  ]
+}
+
+Rules:
+- type must be one of: wfh, casual, sick, earned, maternity, paternity, childcare, womenhealth, prenatal, menstrual, fertility, menopause, domestic_violence, wellness_check
+- Include 2-4 suggestions maximum, ranked 1 (best) to 4
+- rankLabel options: "Best Match", "Good Alternative", "Also Possible", "Low Balance / Not Recommended"
+- canApply must be false if remaining balance is 0 OR if gender restriction applies
+- Only include leave types that are applicable to this employee's gender
+- Be warm, supportive, and non-judgmental in your language especially for sensitive topics
+- For WFH suggestions, note if they can work productively from home despite the situation`;
+
+  // Show thinking state
+  setAdvThinking(true, '✨ Aura-Mira is thinking...', 'Reading your balance & policies');
+  setAdvBtn(true);
+
+  try {
+    // Animated thinking messages while streaming
+    const thinkSteps = [
+      ['🔍 Parsing your situation...', 'Understanding what you need'],
+      ['⚖️ Matching leave types...', 'Comparing against your applicable policies'],
+      ['💰 Checking your balance...', 'Verifying availability for each leave type'],
+      ['🏆 Ranking best options...', 'Ordering by suitability, balance & your profile'],
+    ];
+    let stepIdx = 0;
+    const stepTimer = setInterval(() => {
+      if (stepIdx < thinkSteps.length) {
+        setAdvThinking(true, thinkSteps[stepIdx][0], thinkSteps[stepIdx][1]);
+        stepIdx++;
+      }
+    }, 600);
+
+    // Use streaming for faster perceived response
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        stream: true,
+        messages: [
+          {
+            role: 'user',
+            content: `Employee's reason for needing time off:\n\n"${reason}"\n\nPlease analyze and provide leave/WFH suggestions in the exact JSON format specified.`
+          }
+        ],
+        system: systemPrompt
+      })
+    });
+
+    clearInterval(stepTimer);
+
+    if (!response.ok) {
+      throw new Error(`API error ${response.status}`);
+    }
+
+    // Read the streaming response
+    setAdvThinking(true, '💡 Building your suggestions...', 'Almost ready!');
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+              fullText += parsed.delta.text;
+            }
+          } catch(e) { /* skip non-JSON lines */ }
+        }
+      }
+    }
+
+    const rawText = fullText.trim();
+
+    // Parse JSON — strip any accidental fences
+    const clean = rawText.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+
+    setAdvThinking(false);
+    setAdvBtn(false);
+    renderAdvResults(result, reason, myBals);
+    addAdvHistory(reason, result);
+    await put('audit_log', {
+      action: 'AI_ADVISOR',
+      detail: `${cu.id} queried Aura-Mira advisor: "${reason.substring(0, 60)}..."`,
+      timestamp: new Date().toISOString(),
+      user: cu.id
+    });
+
+  } catch (err) {
+    clearInterval && clearInterval();
+    setAdvThinking(false);
+    setAdvBtn(false);
+
+    // Fallback: rule-based suggestions when API unavailable
+    console.warn('AI API unavailable, using rule-based fallback:', err);
+    const fallback = buildFallbackSuggestions(reason, myBals, applicablePols);
+    renderAdvResults(fallback, reason, myBals);
+    addAdvHistory(reason, fallback);
+    toast('AI advisor used local rule-based mode (API unavailable)', 'info', 'i');
+  }
+}
+
+// ── RENDER SUGGESTION RESULTS ──
+function renderAdvResults(result, reason, myBals) {
+  const rankColors = {
+    1: { color: '#3fb950', badge: 'badge-best', label: result.suggestions[0]?.rankLabel || 'Best Match' },
+    2: { color: '#58a6ff', badge: 'badge-alt',  label: 'Good Alternative' },
+    3: { color: '#ffa657', badge: 'badge-low',  label: 'Also Possible' },
+    4: { color: '#f78166', badge: 'badge-na',   label: 'Low Balance / Not Recommended' },
+  };
+
+  // Insight box
+  document.getElementById('advInsight').innerHTML = `
+    <div class="adv-insight-title">&#x1F4A1; AI Analysis</div>
+    <div class="adv-insight-text">${result.summary || 'Here are your best leave options based on your reason.'}</div>
+  `;
+
+  // Suggestion cards
+  document.getElementById('advCards').innerHTML = (result.suggestions || []).map((s, i) => {
+    const rk = rankColors[s.rank] || rankColors[i + 1] || rankColors[4];
+    const bal = myBals.find(b => b.type === s.type);
+    const rem = bal ? bal.remaining : (s.balanceRemaining ?? '?');
+    const tot = bal ? bal.total : (s.balanceTotal ?? '?');
+    const pct = tot > 0 ? Math.round((rem / tot) * 100) : 0;
+    const balClass = rem === 0 ? 'zero' : rem < 3 ? 'low' : '';
+    const canApply = s.canApply && rem > 0;
+
+    return `
+      <div class="adv-card">
+        <div class="adv-card-accent" style="background:${rk.color}"></div>
+        <div class="adv-card-body">
+          <div class="adv-card-header">
+            <div class="adv-card-title">
+              <span>${s.label || lbl(s.type)}</span>
+            </div>
+            <span class="adv-card-badge ${rk.badge}">${s.rankLabel || rk.label}</span>
+          </div>
+
+          <div class="adv-card-reason">${s.whyGood || ''}</div>
+
+          <div class="adv-bal-row">
+            <span style="color:var(--t3)">Balance:</span>
+            <span class="adv-bal-val ${balClass}">${rem}</span>
+            <span style="color:var(--t3)">of ${tot} days</span>
+            <div style="flex:1;margin:0 8px"><div class="pb"><div class="pf" style="width:${pct}%;background:${rk.color}"></div></div></div>
+          </div>
+
+          ${s.conditions && s.conditions.length ? `
+          <div class="adv-conditions">
+            ${s.conditions.map(c => `<span class="adv-cond">${c}</span>`).join('')}
+          </div>` : ''}
+
+          ${canApply
+            ? `<button class="adv-apply-btn go" onclick="advApply('${s.type}', '${reason.replace(/'/g, "\\'").replace(/\n/g, ' ').substring(0, 120)}')">
+                 &#x2713; Apply ${s.label || lbl(s.type)} Now
+               </button>`
+            : `<button class="adv-apply-btn disabled" disabled>
+                 ${rem === 0 ? '&#x26A0;&#xFE0F; No balance remaining' : (s.canApplyReason || '&#x26A0;&#xFE0F; Not available for your profile')}
+               </button>`
+          }
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('advResults').classList.add('show');
+}
+
+// ── ONE-CLICK APPLY FROM ADVISOR ──
+function advApply(type, reason) {
+  const today_ = today();
+  document.getElementById('aType').value = type;
+  document.getElementById('aFrom').value = today_;
+  document.getElementById('aTo').value   = today_;
+  document.getElementById('aReason').value = reason;
+  onTypeChange();
+  goSec('apply');
+  toast(`Pre-filled ${lbl(type)} form. Adjust dates & submit!`, 'success', '&#x1F4DD;');
+  speak(`Opening the ${lbl(type).replace(/[^\x20-\x7E]/g,'')} form for you. Please adjust the dates and submit.`);
+}
+
+// ── RULE-BASED FALLBACK (when API is offline) ──
+function buildFallbackSuggestions(reason, myBals, policies) {
+  const t = reason.toLowerCase();
+  const getBal = (type) => myBals.find(b => b.type === type);
+  const suggestions = [];
+  let summary = '';
+
+  const isSick      = t.match(/sick|fever|ill|unwell|headache|cold|flu|pain|nausea|vomit/);
+  const isWFH       = t.match(/work from home|wfh|home|plumber|electrician|internet|delivery|repair/);
+  const isChild     = t.match(/child|kid|son|daughter|school|parent|baby/);
+  const isVacation  = t.match(/vacation|holiday|trip|travel|tour|visit|family/);
+  const isPersonal  = t.match(/personal|errand|appointment|bank|office/);
+  const isMedical   = t.match(/doctor|hospital|clinic|checkup|medical|health/);
+  const isWomHealth = t.match(/women|period|menstrual|gynec|pregnancy|prenatal/);
+  const isMaternity = t.match(/maternity|pregnant|delivery|baby/);
+  const isMenstrual = t.match(/period|menstrual|cramp|dysmenorrhea|pms|cycle/);
+  const isFertility = t.match(/ivf|fertility|treatment|egg|embryo|reproductive/);
+  const isMenopause = t.match(/menopause|perimenopause|hot flash|hormonal/);
+  const isDV        = t.match(/domestic|violence|abuse|safety|threat|unsafe/);
+  const isWellness  = t.match(/mammogram|pap smear|bone density|screening|annual/);
+
+  if(isMenstrual && cu.gender==='F'){
+    summary='This appears to be related to menstrual health. Menstrual Wellness Leave is confidential and requires no documentation.';
+    const ml=getBal('menstrual');const wh=getBal('womenhealth');
+    suggestions.push({type:'menstrual',label:'🌸 Menstrual Wellness Leave',rank:1,rankLabel:'Best Match',available:true,balanceRemaining:ml?.remaining,balanceTotal:ml?.total,whyGood:'Menstrual Wellness Leave is designed specifically for this — fully confidential, no documentation required.',conditions:['Self-declaration only','Fully confidential','Cannot carry forward'],canApply:(ml?.remaining||0)>0});
+    suggestions.push({type:'womenhealth',label:"♀️ Women's Health Leave",rank:2,rankLabel:'Good Alternative',available:true,balanceRemaining:wh?.remaining,balanceTotal:wh?.total,whyGood:"Women's Health Leave also covers menstrual health as a backup option.",conditions:['Self-cert for 2 days','Doctor note for 3+ days'],canApply:(wh?.remaining||0)>0});
+  } else if(isFertility && cu.gender==='F'){
+    summary='This appears to be related to fertility treatment. Fertility Treatment Leave is confidential and designed for this purpose.';
+    const fl=getBal('fertility');const sl=getBal('sick');
+    suggestions.push({type:'fertility',label:'💗 Fertility Treatment Leave',rank:1,rankLabel:'Best Match',available:true,balanceRemaining:fl?.remaining,balanceTotal:fl?.total,whyGood:'Fertility Treatment Leave covers IVF and related medical procedures with full confidentiality.',conditions:['Medical appointment proof','Confidential','Can be taken in half-days'],canApply:(fl?.remaining||0)>0});
+    suggestions.push({type:'sick',label:'🏥 Sick Leave',rank:2,rankLabel:'Good Alternative',available:true,balanceRemaining:sl?.remaining,balanceTotal:sl?.total,whyGood:'Sick leave can cover post-treatment recovery.',conditions:['Inform supervisor','Doctor cert for 3+ days'],canApply:(sl?.remaining||0)>0});
+  } else if(isDV && cu.gender==='F'){
+    summary='We understand this is a sensitive situation. DV Support Leave is fully confidential and HR can provide additional resources.';
+    const dv=getBal('domestic_violence');const cl=getBal('casual');
+    suggestions.push({type:'domestic_violence',label:'🛡️ DV Support Leave',rank:1,rankLabel:'Best Match',available:true,balanceRemaining:dv?.remaining,balanceTotal:dv?.total,whyGood:'DV Support Leave is fully confidential, covers legal proceedings, medical appointments, and relocation.',conditions:['Fully confidential','HR support available','Legal aid resources provided'],canApply:(dv?.remaining||0)>0});
+    suggestions.push({type:'casual',label:'🌴 Casual Leave',rank:2,rankLabel:'Good Alternative',available:true,balanceRemaining:cl?.remaining,balanceTotal:cl?.total,whyGood:'Casual leave can supplement DV leave.',conditions:['No reason disclosure required'],canApply:(cl?.remaining||0)>0});
+  } else if(isWellness && cu.gender==='F'){
+    summary="This appears to be for a routine health screening. Wellness Check Leave is specifically designed for women's annual health checkups.";
+    const wc=getBal('wellness_check');const sl=getBal('sick');
+    suggestions.push({type:'wellness_check',label:'🩺 Wellness Check Leave',rank:1,rankLabel:'Best Match',available:true,balanceRemaining:wc?.remaining,balanceTotal:wc?.total,whyGood:"Wellness Check Leave is for mammograms, PAP smears, bone density scans and other routine screenings.",conditions:['Appointment proof required','Half-day available'],canApply:(wc?.remaining||0)>0});
+    suggestions.push({type:'sick',label:'🏥 Sick Leave',rank:2,rankLabel:'Good Alternative',available:true,balanceRemaining:sl?.remaining,balanceTotal:sl?.total,whyGood:'Sick leave can be used as a backup if wellness leave is exhausted.',conditions:['Inform supervisor'],canApply:(sl?.remaining||0)>0});
+  } else if (isSick) {
+    summary = 'Your reason suggests you are unwell. Sick leave is the most appropriate option. If you can still work partially, WFH is also a good alternative.';
+    const sl = getBal('sick');
+    suggestions.push({ type:'sick', label:'&#x1F3E5; Sick Leave', rank:1, rankLabel:'Best Match', available:true, balanceRemaining:sl?.remaining, balanceTotal:sl?.total, whyGood:'Sick leave is specifically designed for illness and health recovery. It covers fever, flu, pain, and general unwellness.', conditions:['Inform manager by 9 AM','Doctor certificate for 3+ consecutive days'], canApply:(sl?.remaining||0)>0, canApplyReason:sl?.remaining===0?'No sick leave balance':'OK' });
+    if (isWFH || isSick) {
+      const wb = getBal('wfh');
+      suggestions.push({ type:'wfh', label:'&#x1F3E0; Work From Home', rank:2, rankLabel:'Good Alternative', available:true, balanceRemaining:wb?.remaining, balanceTotal:wb?.total, whyGood:'If you can work despite feeling unwell, WFH lets you rest at home while staying productive.', conditions:['Available for partial illness','Inform manager'], canApply:(wb?.remaining||0)>0, canApplyReason:wb?.remaining===0?'No WFH balance':'OK' });
+    }
+  } else if (isWFH && !isSick) {
+    summary = 'Your situation sounds ideal for Work From Home — you can stay productive while handling things at home.';
+    const wb = getBal('wfh');
+    suggestions.push({ type:'wfh', label:'&#x1F3E0; Work From Home', rank:1, rankLabel:'Best Match', available:true, balanceRemaining:wb?.remaining, balanceTotal:wb?.total, whyGood:'WFH is perfect when you need to be at home for visits, deliveries, or repairs while still working.', conditions:['Inform manager','VPN required','Meet all deliverables'], canApply:(wb?.remaining||0)>0, canApplyReason:wb?.remaining===0?'No WFH balance':'OK' });
+    const cl = getBal('casual');
+    suggestions.push({ type:'casual', label:'&#x1F334; Casual Leave', rank:2, rankLabel:'Good Alternative', available:true, balanceRemaining:cl?.remaining, balanceTotal:cl?.total, whyGood:'If you prefer a full day off instead of working from home, casual leave works well for one-off personal situations.', conditions:['Advance notice preferred','Max 3 consecutive days'], canApply:(cl?.remaining||0)>0, canApplyReason:cl?.remaining===0?'No casual leave balance':'OK' });
+  } else if (isVacation) {
+    summary = 'For a vacation or multi-day trip, Earned Leave is the recommended choice. Casual leave can supplement for shorter breaks.';
+    const el = getBal('earned'); const cl = getBal('casual');
+    suggestions.push({ type:'earned', label:'&#x1F4BC; Earned Leave', rank:1, rankLabel:'Best Match', available:true, balanceRemaining:el?.remaining, balanceTotal:el?.total, whyGood:'Earned leave is designed for planned vacations, extended rest, and personal time off. It offers the most days.', conditions:['Apply 1 month in advance','Minimum 3 days per application'], canApply:(el?.remaining||0)>0, canApplyReason:el?.remaining===0?'No earned leave balance':'OK' });
+    suggestions.push({ type:'casual', label:'&#x1F334; Casual Leave', rank:2, rankLabel:'Good Alternative', available:true, balanceRemaining:cl?.remaining, balanceTotal:cl?.total, whyGood:'For shorter trips (2-3 days), casual leave is a simpler option with less advance notice required.', conditions:['Advance notice preferred','Max 3 consecutive days'], canApply:(cl?.remaining||0)>0, canApplyReason:cl?.remaining===0?'No casual leave balance':'OK' });
+  } else if (isChild) {
+    summary = 'Your reason involves your child. If female, Child Care Leave is available as a lifetime benefit. Casual leave and WFH are good options for school events.';
+    const cl = getBal('casual'); const wb = getBal('wfh');
+    suggestions.push({ type:'casual', label:'&#x1F334; Casual Leave', rank:1, rankLabel:'Best Match', available:true, balanceRemaining:cl?.remaining, balanceTotal:cl?.total, whyGood:'Casual leave is ideal for school functions, parent-teacher meetings, and one-off child-related events.', conditions:['1 day advance notice preferred'], canApply:(cl?.remaining||0)>0 });
+    if (cu.gender === 'F') {
+      const cc = getBal('childcare');
+      suggestions.push({ type:'childcare', label:'&#x1F476; Child Care Leave', rank:2, rankLabel:'Good Alternative', available:true, balanceRemaining:cc?.remaining, balanceTotal:cc?.total, whyGood:'As a female employee, you have Child Care Leave as a lifetime entitlement. Best used for extended child-related needs.', conditions:['Children under 18','Max 90 days at a stretch'], canApply:(cc?.remaining||0)>0 });
+    }
+    suggestions.push({ type:'wfh', label:'&#x1F3E0; Work From Home', rank:cu.gender==='F'?3:2, rankLabel:'Also Possible', available:true, balanceRemaining:wb?.remaining, balanceTotal:wb?.total, whyGood:'If your child needs supervision but you can still work, WFH lets you handle both responsibilities.', conditions:['Must meet all work deliverables'], canApply:(wb?.remaining||0)>0 });
+  } else if (isMedical || isPersonal) {
+    summary = 'For a medical appointment or personal errand, Casual Leave is usually the right choice. WFH can work if the appointment is short.';
+    const cl = getBal('casual'); const sl = getBal('sick'); const wb = getBal('wfh');
+    suggestions.push({ type:'casual', label:'&#x1F334; Casual Leave', rank:1, rankLabel:'Best Match', available:true, balanceRemaining:cl?.remaining, balanceTotal:cl?.total, whyGood:'Casual leave is perfect for doctor appointments, personal errands, and short personal commitments.', conditions:['1 day advance notice preferred'], canApply:(cl?.remaining||0)>0 });
+    suggestions.push({ type:'sick', label:'&#x1F3E5; Sick Leave', rank:2, rankLabel:'Good Alternative', available:true, balanceRemaining:sl?.remaining, balanceTotal:sl?.total, whyGood:'If the appointment is health-related or you need to rest after, sick leave is appropriate.', conditions:['May require doctor note'], canApply:(sl?.remaining||0)>0 });
+    suggestions.push({ type:'wfh', label:'&#x1F3E0; Work From Home', rank:3, rankLabel:'Also Possible', available:true, balanceRemaining:wb?.remaining, balanceTotal:wb?.total, whyGood:'If the appointment is brief and you can work before or after, WFH is a minimal-disruption option.', conditions:['Must complete work deliverables'], canApply:(wb?.remaining||0)>0 });
+  } else if (isWomHealth && cu.gender === 'F') {
+    summary = "This appears to be a women's health related request. Women's Health Leave is confidential and designed exactly for this purpose.";
+    const wh = getBal('womenhealth'); const sl = getBal('sick');
+    suggestions.push({ type:'womenhealth', label:"&#x2640;&#xFE0F; Women's Health Leave", rank:1, rankLabel:'Best Match', available:true, balanceRemaining:wh?.remaining, balanceTotal:wh?.total, whyGood:"Women's Health Leave is fully confidential and covers menstrual health, gynaecological checkups, and related needs. Not disclosed to your manager.", conditions:['Self-certification for 2 days','Doctor note for 3+ days','Fully confidential'], canApply:(wh?.remaining||0)>0 });
+    suggestions.push({ type:'sick', label:'&#x1F3E5; Sick Leave', rank:2, rankLabel:'Good Alternative', available:true, balanceRemaining:sl?.remaining, balanceTotal:sl?.total, whyGood:"If Women's Health Leave is exhausted, sick leave covers general health and recovery needs.", conditions:['Inform supervisor','Doctor certificate for 3+ days'], canApply:(sl?.remaining||0)>0 });
+  } else {
+    // Generic fallback
+    summary = "Based on your description, here are the most commonly applicable leave options. Choose the one that best fits your situation.";
+    const cl = getBal('casual'); const wb = getBal('wfh'); const sl = getBal('sick');
+    suggestions.push({ type:'casual', label:'&#x1F334; Casual Leave', rank:1, rankLabel:'Best Match', available:true, balanceRemaining:cl?.remaining, balanceTotal:cl?.total, whyGood:'Casual leave is the most versatile option for personal, family, or unexpected needs.', conditions:['Advance notice preferred','Max 3 consecutive days'], canApply:(cl?.remaining||0)>0 });
+    suggestions.push({ type:'wfh', label:'&#x1F3E0; Work From Home', rank:2, rankLabel:'Good Alternative', available:true, balanceRemaining:wb?.remaining, balanceTotal:wb?.total, whyGood:'If you can still work remotely, WFH avoids using leave balance while giving you flexibility.', conditions:['Inform manager','VPN required'], canApply:(wb?.remaining||0)>0 });
+    suggestions.push({ type:'sick', label:'&#x1F3E5; Sick Leave', rank:3, rankLabel:'Also Possible', available:true, balanceRemaining:sl?.remaining, balanceTotal:sl?.total, whyGood:'If your reason involves health or you need rest, sick leave is appropriate.', conditions:['Doctor certificate for 3+ consecutive days'], canApply:(sl?.remaining||0)>0 });
+  }
+
+  return { summary, suggestions };
+}
+
+// ── ADD TO HISTORY ──
+function addAdvHistory(reason, result) {
+  advHistory.unshift({ reason: reason.substring(0, 80), count: result.suggestions?.length || 0, time: new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'}), topSuggestion: result.suggestions?.[0]?.label || '' });
+  if (advHistory.length > 5) advHistory.pop();
+
+  document.getElementById('advHistory').innerHTML = advHistory.map(h => `
+    <div class="adv-history-item" onclick="fillAdvReason('${h.reason.replace(/'/g,"\\'")}')">
+      <div class="adv-history-reason">${h.reason}${h.reason.length >= 80 ? '...' : ''}</div>
+      <div class="adv-history-meta">${h.time} &middot; ${h.count} suggestions &middot; Top: ${h.topSuggestion}</div>
+    </div>`).join('');
+}
+
+// ── UI STATE HELPERS ──
+function setAdvThinking(show, msg, sub) {
+  const el = document.getElementById('advThinking');
+  el.classList.toggle('show', show);
+  if (msg) document.getElementById('advThinkingMsg').textContent = msg;
+  if (sub) document.getElementById('advThinkingSub').textContent = sub;
+  if (show) {
+    document.getElementById('advResults').classList.remove('show');
+  }
+}
+
+function setAdvBtn(disabled) {
+  const btn = document.getElementById('advBtn');
+  btn.disabled = disabled;
+  document.getElementById('advBtnIcon').textContent = disabled ? '&#x23F3;' : '&#x1F9E0;';
+  document.getElementById('advBtnText').textContent = disabled ? 'Analyzing...' : 'Analyze & Suggest Best Options';
+}
+
+
+</script>
+</body>
+</html>

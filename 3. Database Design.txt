@@ -1,0 +1,121 @@
+Database Design: 3-Table Version
+
+
+1. Entities and Relationships
+Entities
+
+Employee – Stores employee details and hierarchy (managers).
+
+Request – Stores flexible work requests, AI-generated justification, manager approval, and feedback.
+
+Policy – Stores company policies and optionally links policies to requests.
+
+Relationships
+Relationship	Type	Description
+Employee → Request	1:N	An employee can submit multiple requests.
+Employee → Request.manager_id	1:N	Manager approves multiple requests.
+Request → Policy	1:N	Each request can be associated with multiple policies (simplified).
+
+Notes:
+
+Manager hierarchy is self-referencing via employee.manager_id.
+
+Feedback/outcome is stored in the Request table for simplicity.
+
+Policy linking is simplified: each policy can reference a request.
+
+2. Table Structures
+2.1 Employee Table
+Column	Type	Constraints	Description
+employee_id	SERIAL	PK, Auto-increment	Unique employee ID
+name	VARCHAR(100)	NOT NULL	Employee name
+department	VARCHAR(50)	NOT NULL	Department name
+manager_id	INT	FK → employee(employee_id)	Manager of the employee
+role	VARCHAR(50)	NOT NULL	Employee role
+email	VARCHAR(100)	UNIQUE, NOT NULL	Employee email
+created_at	TIMESTAMP	DEFAULT NOW()	Record creation timestamp
+2.2 Request Table
+Column	Type	Constraints	Description
+request_id	SERIAL	PK, Auto-increment	Unique request ID
+employee_id	INT	FK → employee(employee_id)	Request owner
+request_type	VARCHAR(50)	NOT NULL	WFH / Shift Change / Caregiving
+reason_raw	TEXT	NOT NULL	Employee-provided reason
+ai_justification	TEXT		AI-generated professional justification
+status	VARCHAR(20)	DEFAULT 'Pending'	Pending / Approved / Rejected
+start_date	DATE	NOT NULL	Request start date
+end_date	DATE	NOT NULL	Request end date
+urgency_level	VARCHAR(20)		Low / Medium / High
+manager_id	INT	FK → employee(employee_id)	Manager who approves/rejects
+feedback	VARCHAR(20)		Very Helpful / Neutral / Not Helpful
+created_at	TIMESTAMP	DEFAULT NOW()	Creation timestamp
+updated_at	TIMESTAMP	DEFAULT NOW() ON UPDATE NOW()	Last updated
+2.3 Policy Table
+Column	Type	Constraints	Description
+policy_id	SERIAL	PK, Auto-increment	Unique policy ID
+name	VARCHAR(100)	UNIQUE, NOT NULL	Policy name
+description	TEXT		Policy description
+request_id	INT	FK → request(request_id)	Optional link to a request
+created_at	TIMESTAMP	DEFAULT NOW()	Record creation timestamp
+3. ER Diagram Description
+Employee (1) ──< Request (N) >── Employee (Manager) (1:N)
+       │
+       └─< Manager hierarchy (self-reference)
+
+Request (1) ──< Policy (M) [optional link per row] >
+
+Legend:
+
+1:N = one-to-many
+
+Self-reference = manager hierarchy
+
+Request → Policy = optional association (can store multiple rows for multiple policies)
+
+4. Sample SQL (PostgreSQL)
+-- Employee Table
+CREATE TABLE employee (
+    employee_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    department VARCHAR(50) NOT NULL,
+    manager_id INT REFERENCES employee(employee_id),
+    role VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Request Table
+CREATE TABLE request (
+    request_id SERIAL PRIMARY KEY,
+    employee_id INT REFERENCES employee(employee_id),
+    request_type VARCHAR(50) NOT NULL,
+    reason_raw TEXT NOT NULL,
+    ai_justification TEXT,
+    status VARCHAR(20) DEFAULT 'Pending',
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    urgency_level VARCHAR(20),
+    manager_id INT REFERENCES employee(employee_id),
+    feedback VARCHAR(20),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Policy Table
+CREATE TABLE policy (
+    policy_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
+    request_id INT REFERENCES request(request_id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+5. Advantages of This 3-Table Design
+
+Simplified for MVP or prototyping.
+
+Supports chatbot workflow: request intake, AI justification, approval, feedback.
+
+Maintains manager hierarchy via self-referencing manager_id.
+
+Allows policy tagging per request without extra join tables.
+
+Easy to expand later into the full 6-table ER design.

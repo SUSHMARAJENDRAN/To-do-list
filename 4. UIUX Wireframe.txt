@@ -1,0 +1,43 @@
+UI/UX Wireframe
+
+Being a senior UI/UX designer of a global corporate Generate navigating UI/UX wireframe in an attractive and professional manner for AI‑Assisted Flexible Work & Life Balance Request System. This System is built in such a way that, there is an internal organization portal like www.ultimatix.net of TCS where employees could login with SSO. The AI‑Assisted Flexible Work & Life Balance Request System should be some agent like Gemini that would be an add on feature to the existing portal with a robotic girl named Aura-Mira who could help the employees to raise request for working from home, shift changes or care giving support. The decision should be made based on the policies and procedures of the organization.
+
+The navigation should be in such a way that, an employee should login to the portal which is sso and then there is a home page with similar to ultimatix.net with the aura-mira ai assistant placed on the right top corner of the page. Clicking on the aura-mira, should open a chat bot with a question "Hello "Employee name" Say Kaivtha is the employee logged in, And ask "What assistance you need for today"?
+
+https://aura-mira.lovable.app/
+
+Functional Document
+
+Coding:
+As a senior developer, Create a project structure and the frontend code with react and backend code with python, to build a multi agent ai assistant that could be embedded in an organization internal portal. The functional scope of the assistant is as follows:
+I‑Assisted Flexible Work & Life Balance Request System 
+As a woman employee, I want to request flexible work arrangements—such as working from home, 
+shift changes, and caregiving support—with the assistance of AI. The AI should help me structure 
+my request, track approval status, and monitor outcomes to ensure that work-life balance is 
+promoted fairly and consistently across the organization. 
+Expanded Details 
+• Request Initiation: Employees can submit requests for flexible work arrangements through 
+an intuitive interface. The AI guides users to specify their needs (e.g., WFH, shift changes, 
+caregiving support) and captures relevant context such as timing, urgency, and supporting 
+information. 
+• AI-Generated Justification: The AI analyzes the employee’s informal reasoning, converting 
+it into a professionally formatted justification. It suggests relevant request categories and 
+references applicable company policies, ensuring the submission aligns with organizational 
+guidelines. 
+• Approval Workflow: Requests are routed automatically to designated approvers based on 
+organizational hierarchy and type of request.  
+• Policy Tagging: Each request is tagged with relevant company policies and procedures, 
+helping both employees and managers understand the criteria for approval and ensuring 
+compliance. 
+• Outcome Monitoring: The system tracks outcomes of approved or denied requests, 
+enabling employees to receive feedback and suggestions for future submissions. The AI 
+provides analytics on the effectiveness of flexible arrangements and their impact on work
+life balance. 
+Functional Scope 
+• Request Intake: Guided submission process for flexible work arrangements. 
+• AI-Generated Justification: Intelligent conversion of informal reasoning to professional 
+requests. 
+• Approval Workflow: Automated routing, tracking, and follow-up of requests. 
+• Policy Tagging: Linking requests to company policies for clarity and compliance. 
+• Outcome Monitoring: Feedback and analytics on request outcomes. 
+• Reporting dashboard
