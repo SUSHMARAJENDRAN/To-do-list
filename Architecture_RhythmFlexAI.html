@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Architecture Document — RhythmFlex AI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --navy:#0f1c2e;--navy-mid:#1a2f4a;--navy-soft:#243d5c;
+  --accent:#4f8ef7;--accent-light:#e8f0fe;--accent-mid:#92b9fb;
+  --teal:#0d9488;--teal-light:#e0f5f3;--teal-dark:#085041;
+  --amber:#d97706;--amber-light:#fef3c7;
+  --rose:#e11d48;--rose-light:#ffeef2;
+  --violet:#7c3aed;--violet-light:#f0ebff;
+  --emerald:#059669;--emerald-light:#d1fae5;
+  --orange:#ea580c;--orange-light:#fff7ed;
+  --ink:#1e293b;--ink-mid:#475569;--ink-soft:#94a3b8;
+  --surface:#f8fafc;--surface-mid:#f1f5f9;
+  --border:#e2e8f0;--border-mid:#cbd5e1;--white:#ffffff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);line-height:1.7;font-size:15px;}
+
+/* COVER */
+.cover{background:var(--navy);min-height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;page-break-after:always;}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(79,142,247,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.06) 1px,transparent 1px);background-size:48px 48px;}
+.glow1{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(79,142,247,.18) 0%,transparent 70%);top:-100px;right:-100px;pointer-events:none;}
+.glow2{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(13,148,136,.12) 0%,transparent 70%);bottom:-80px;left:-80px;pointer-events:none;}
+.c-hdr{padding:2.5rem 3.5rem;display:flex;align-items:center;justify-content:space-between;position:relative;border-bottom:1px solid rgba(255,255,255,.08);}
+.c-logo{display:flex;align-items:center;gap:10px;}
+.c-logo-mark{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.c-logo-name{font-size:13px;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.05em;text-transform:uppercase;}
+.c-meta-top{font-size:12px;color:rgba(255,255,255,.4);font-family:'DM Mono',monospace;}
+.c-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:4rem 3.5rem;position:relative;}
+.c-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent-mid);margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;}
+.c-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--accent-mid);}
+.c-title{font-family:'DM Serif Display',serif;font-size:clamp(2.2rem,4.5vw,3.2rem);color:white;line-height:1.15;max-width:680px;margin-bottom:1.5rem;}
+.c-title em{font-style:italic;color:var(--accent-mid);}
+.c-sub{font-size:15px;color:rgba(255,255,255,.5);max-width:520px;line-height:1.7;margin-bottom:3rem;}
+.c-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4rem;}
+.c-chip{font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);background:rgba(255,255,255,.05);}
+.c-meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;max-width:680px;}
+.c-mc{background:rgba(255,255,255,.03);padding:1.1rem 1.25rem;}
+.c-mc-l{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:4px;}
+.c-mc-v{font-size:13px;font-weight:500;color:rgba(255,255,255,.75);}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:220px 1fr;}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--white);border-right:1px solid var(--border);padding:2.5rem 1.5rem;}
+.sb-slabel{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;margin-top:1.5rem;padding-left:8px;}
+.sb-slabel:first-child{margin-top:0;}
+.sidebar a{display:block;padding:5px 8px;font-size:12.5px;color:var(--ink-mid);text-decoration:none;border-radius:6px;transition:all .15s;margin-bottom:1px;}
+.sidebar a:hover{background:var(--surface-mid);color:var(--navy);}
+.sb-logo{font-size:12px;font-weight:600;color:var(--navy);margin-bottom:1.5rem;display:flex;align-items:center;gap:8px;}
+.sb-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+.main{padding:3rem 3.5rem;}
+.section{margin-bottom:4rem;scroll-margin-top:2rem;}
+.s-hdr{display:flex;align-items:flex-start;gap:16px;margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:2px solid var(--navy);}
+.s-num{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--accent);background:var(--accent-light);padding:4px 8px;border-radius:4px;margin-top:6px;white-space:nowrap;}
+.s-title{font-family:'DM Serif Display',serif;font-size:1.65rem;color:var(--navy);line-height:1.2;}
+p{margin-bottom:.85rem;color:var(--ink-mid);font-size:13.5px;line-height:1.75;}
+
+/* DIAGRAM CONTAINER */
+.dbox{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:1.25rem 0;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.d-bar{padding:11px 20px;background:var(--navy);color:rgba(255,255,255,.85);font-size:12px;font-family:'DM Mono',monospace;letter-spacing:.04em;display:flex;align-items:center;justify-content:space-between;}
+.d-badge{font-size:10px;color:rgba(255,255,255,.4);}
+.d-body{padding:24px;}
+.d-caption{font-size:12px;color:var(--ink-soft);padding:8px 20px 12px;background:var(--surface-mid);border-top:1px solid var(--border);line-height:1.5;}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 18px;background:var(--surface-mid);border-top:1px solid var(--border);}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-mid);}
+.ld{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+
+/* TECH STACK GRID */
+.tg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:1.25rem 0;}
+.tc{border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;background:var(--white);}
+.tc-bar{height:3px;border-radius:2px;margin-bottom:10px;}
+.tc-t{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px;}
+.tc-i{font-size:11.5px;color:var(--ink-mid);line-height:1.6;}
+
+/* DECISION CARDS */
+.dc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:1.25rem 0;}
+.dc{border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;background:var(--white);}
+.dc-id{font-size:10px;font-family:'DM Mono',monospace;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.dc-t{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px;}
+.dc-tx{font-size:12px;color:var(--ink-mid);line-height:1.6;}
+.callout{padding:1rem 1.25rem;border-radius:8px;margin:1.25rem 0;display:flex;gap:12px;align-items:flex-start;font-size:13px;line-height:1.6;background:var(--accent-light);border-left:3px solid var(--accent);}
+.callout b{color:var(--navy);}
+
+/* FOOTER */
+.footer{background:var(--navy);color:rgba(255,255,255,.4);font-size:11.5px;font-family:'DM Mono',monospace;display:flex;align-items:center;justify-content:space-between;padding:1rem 2.5rem;}
+
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{display:none;}.main{padding:2rem 1.5rem;}.tg{grid-template-columns:1fr 1fr;}.dc-grid{grid-template-columns:1fr;}.c-meta-grid{grid-template-columns:1fr 1fr;}.c-body{padding:2.5rem 2rem;}.c-hdr{padding:1.5rem 2rem;}}
+</style>
+</head>
+<body>
+<!-- ══ COVER ══ -->
+<div class="cover">
+  <div class="bg-grid"></div><div class="glow1"></div><div class="glow2"></div>
+  <div class="c-hdr">
+    <div class="c-logo">
+      <div class="c-logo-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+      <span class="c-logo-name">TCS · AI for IT – SDLC · RhythmFlex AI</span>
+    </div>
+    <div class="c-meta-top">DOC-ARCH-002 · CONFIDENTIAL</div>
+  </div>
+  <div class="c-body">
+    <div class="c-label">Application Architecture Document</div>
+    <h1 class="c-title">RhythmFlex AI —<br/><em>System Architecture</em><br/>&amp; Design Blueprint</h1>
+    <p class="c-sub">Seven professional architecture diagrams covering system context, three-tier design, AI integration pipeline, approval workflow, deployment topology, data flow, and security model.</p>
+    <div class="c-chips">
+      <span class="c-chip">D1 · System Context</span>
+      <span class="c-chip">D2 · Three-Tier Architecture</span>
+      <span class="c-chip">D3 · Component Map</span>
+      <span class="c-chip">D4 · AI Pipeline</span>
+      <span class="c-chip">D5 · Approval Workflow</span>
+      <span class="c-chip">D6 · Deployment Topology</span>
+      <span class="c-chip">D7 · Security Flow</span>
+    </div>
+    <div class="c-meta-grid">
+      <div class="c-mc"><div class="c-mc-l">Document ID</div><div class="c-mc-v">DOC-ARCH-002</div></div>
+      <div class="c-mc"><div class="c-mc-l">Version</div><div class="c-mc-v">1.0.0</div></div>
+      <div class="c-mc"><div class="c-mc-l">Date</div><div class="c-mc-v">13 March 2026</div></div>
+      <div class="c-mc"><div class="c-mc-l">Status</div><div class="c-mc-v">Final Draft</div></div>
+    </div>
+  </div>
+</div>
+<!-- ══ LAYOUT ══ -->
+<div class="layout">
+<nav class="sidebar">
+  <div class="sb-logo"><div class="sb-dot"></div>ARCH Navigator</div>
+  <div class="sb-slabel">Overview</div>
+  <a href="#overview">Architecture Overview</a>
+  <a href="#techstack">Technology Stack</a>
+  <div class="sb-slabel">Diagrams</div>
+  <a href="#d1">D1 · System Context</a>
+  <a href="#d2">D2 · Three-Tier</a>
+  <a href="#d3">D3 · Component Map</a>
+  <a href="#d4">D4 · AI Pipeline</a>
+  <a href="#d5">D5 · Approval Workflow</a>
+  <a href="#d6">D6 · Deployment</a>
+  <a href="#d7">D7 · Security Flow</a>
+  <div class="sb-slabel">Reference</div>
+  <a href="#decisions">Design Decisions</a>
+</nav>
+<main class="main">
+<!-- § 01 OVERVIEW -->
+<section class="section" id="overview">
+  <div class="s-hdr"><span class="s-num">§ 01</span><h2 class="s-title">Architecture Overview</h2></div>
+  <p>RhythmFlex AI follows a <strong>three-tier client-server architecture</strong> running entirely on a local Docker Compose stack. The React SPA provides the employee and manager interface. FastAPI handles all business logic, workflow automation, and AI orchestration. PostgreSQL stores all relational data with full audit trails.</p>
+  <div class="callout"><span>ℹ️</span><div><b>Golden Rule:</b> All AI processing is server-side only. The Anthropic API key never reaches the browser. The React frontend communicates exclusively with the FastAPI backend over JWT-secured REST APIs on localhost.</div></div>
+</section>
+
+<!-- § 02 TECH STACK -->
+<section class="section" id="techstack">
+  <div class="s-hdr"><span class="s-num">§ 02</span><h2 class="s-title">Technology Stack</h2></div>
+  <div class="tg">
+    <div class="tc"><div class="tc-bar" style="background:#4f8ef7"></div><div class="tc-t">Frontend</div><div class="tc-i">React 18 · Tailwind CSS · React Query · Recharts · Axios · Vite · React Router v6</div></div>
+    <div class="tc"><div class="tc-bar" style="background:#0d9488"></div><div class="tc-t">Backend API</div><div class="tc-i">FastAPI · Python 3.11 · SQLAlchemy ORM · Pydantic v2 · Alembic · Uvicorn</div></div>
+    <div class="tc"><div class="tc-bar" style="background:#7c3aed"></div><div class="tc-t">AI / Agent</div><div class="tc-i">Claude API (Sonnet) · LangChain · Anthropic SDK · Streamlit · python-jose</div></div>
+    <div class="tc"><div class="tc-bar" style="background:#059669"></div><div class="tc-t">Data &amp; Infra</div><div class="tc-i">PostgreSQL 15 · Redis 7 · pgAdmin 4 · Docker Compose · nginx · SMTP relay</div></div>
+  </div>
+</section>
+<!-- ═══ D1 SYSTEM CONTEXT ═══ -->
+<section class="section" id="d1">
+  <div class="s-hdr"><span class="s-num">§ 03</span><h2 class="s-title">D1 · System Context Diagram</h2></div>
+  <p>Shows all actors (human and system) that interact with the RhythmFlex AI platform boundary. This is the "Level 0" view — what is the system and who talks to it?</p>
+  <div class="dbox">
+    <div class="d-bar"><span>System Context — RhythmFlex AI</span><span class="d-badge">Level 0 · Context View</span></div>
+    <div class="d-body">
+<svg width="100%" viewBox="0 0 720 430" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+<!-- Platform boundary -->
+<rect x="210" y="30" width="300" height="370" rx="16" fill="#eef2ff" stroke="#4f8ef7" stroke-width="1.5" stroke-dasharray="8 4"/>
+<text x="360" y="58" text-anchor="middle" font-family="DM Serif Display,serif" font-size="16" fill="#1a3a7a" font-style="italic">RhythmFlex AI Platform</text>
+<line x1="226" y1="68" x2="494" y2="68" stroke="#4f8ef7" stroke-width="0.5" opacity="0.5"/>
+<!-- Internal modules (6 chips) -->
+<rect x="225" y="76" width="124" height="24" rx="5" fill="white" stroke="#c7d2fe" stroke-width="0.8"/>
+<text x="287" y="93" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#1e293b">📋 Request Intake</text>
+<rect x="363" y="76" width="124" height="24" rx="5" fill="white" stroke="#c7d2fe" stroke-width="0.8"/>
+<text x="425" y="93" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#1e293b">✨ AI Justification</text>
+<rect x="225" y="108" width="124" height="24" rx="5" fill="white" stroke="#c7d2fe" stroke-width="0.8"/>
+<text x="287" y="125" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#1e293b">🔄 Approval Workflow</text>
+<rect x="363" y="108" width="124" height="24" rx="5" fill="white" stroke="#c7d2fe" stroke-width="0.8"/>
+<text x="425" y="125" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#1e293b">🏷️ Policy Tagging</text>
+<rect x="225" y="140" width="124" height="24" rx="5" fill="white" stroke="#c7d2fe" stroke-width="0.8"/>
+<text x="287" y="157" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#1e293b">📈 Outcome Monitor</text>
+<rect x="363" y="140" width="124" height="24" rx="5" fill="white" stroke="#c7d2fe" stroke-width="0.8"/>
+<text x="425" y="157" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#1e293b">📊 Dashboard</text>
+<!-- Data stores inside -->
+<line x1="226" y1="174" x2="494" y2="174" stroke="#c7d2fe" stroke-width="0.5" stroke-dasharray="3 3"/>
+<rect x="230" y="181" width="74" height="20" rx="4" fill="#e0f5f3"/><text x="267" y="196" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#085041">PostgreSQL</text>
+<rect x="312" y="181" width="56" height="20" rx="4" fill="#fef3c7"/><text x="340" y="196" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#6b3a00">Redis</text>
+<rect x="376" y="181" width="56" height="20" rx="4" fill="#f0ebff"/><text x="404" y="196" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#3d1a8a">FastAPI</text>
+<rect x="440" y="181" width="44" height="20" rx="4" fill="#ffeef2"/><text x="462" y="196" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#7a0a28">React</text>
+
+<!-- ── EXTERNAL ACTORS ── -->
+<!-- Employee (left top) -->
+<ellipse cx="80" cy="95" rx="22" ry="22" fill="#e8f0fe" stroke="#4f8ef7" stroke-width="1.5"/>
+<text x="80" y="100" text-anchor="middle" font-size="18">👩‍💼</text>
+<text x="80" y="130" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#1e293b">Employee</text>
+<line x1="103" y1="95" x2="208" y2="115" stroke="#4f8ef7" stroke-width="1.2" marker-end="url(#arr)" marker-start="url(#arr)"/>
+<text x="155" y="96" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#4f8ef7">Submit / View</text>
+
+<!-- Manager (left mid) -->
+<ellipse cx="80" cy="215" rx="22" ry="22" fill="#e0f5f3" stroke="#0d9488" stroke-width="1.5"/>
+<text x="80" y="220" text-anchor="middle" font-size="18">🧑‍💼</text>
+<text x="80" y="250" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#1e293b">Manager</text>
+<line x1="103" y1="215" x2="208" y2="215" stroke="#0d9488" stroke-width="1.2" marker-end="url(#arr)" marker-start="url(#arr)"/>
+<text x="155" y="208" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#0d9488">Approve / Reject</text>
+
+<!-- HR Admin (left bottom) -->
+<ellipse cx="80" cy="340" rx="22" ry="22" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+<text x="80" y="345" text-anchor="middle" font-size="18">🏢</text>
+<text x="80" y="375" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#1e293b">HR Admin</text>
+<line x1="103" y1="340" x2="208" y2="340" stroke="#d97706" stroke-width="1.2" marker-end="url(#arr)" marker-start="url(#arr)"/>
+<text x="155" y="333" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#d97706">Policy / Override</text>
+
+<!-- Claude API (right top) -->
+<rect x="558" y="68" width="120" height="44" rx="8" fill="#f0ebff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="618" y="87" text-anchor="middle" font-size="14">🤖</text>
+<text x="618" y="103" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#3d1a8a">Claude API</text>
+<line x1="557" y1="100" x2="512" y2="120" stroke="#7c3aed" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr)" marker-start="url(#arr)"/>
+<text x="540" y="100" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#7c3aed">AI calls</text>
+
+<!-- SMTP (right mid) -->
+<rect x="558" y="180" width="120" height="44" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+<text x="618" y="199" text-anchor="middle" font-size="14">📧</text>
+<text x="618" y="215" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#7c2d12">SMTP Server</text>
+<line x1="557" y1="202" x2="512" y2="202" stroke="#ea580c" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr)"/>
+<text x="533" y="195" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#ea580c">Notifications</text>
+
+<!-- HR CSV (right bottom) -->
+<rect x="558" y="300" width="120" height="44" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="618" y="319" text-anchor="middle" font-size="14">📁</text>
+<text x="618" y="335" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#065f46">HR System CSV</text>
+<line x1="557" y1="322" x2="512" y2="322" stroke="#059669" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr)"/>
+<text x="533" y="315" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#059669">Org hierarchy</text>
+</svg>
+    </div>
+    <div class="legend">
+      <div class="li"><div class="ld" style="background:#eef2ff;border:1px solid #4f8ef7"></div>Platform boundary (dashed)</div>
+      <div class="li"><div class="ld" style="background:#4f8ef7"></div>User ↔ Platform interaction</div>
+      <div class="li"><div class="ld" style="background:#7c3aed"></div>External API call (dashed line)</div>
+      <div class="li"><div class="ld" style="background:#059669"></div>Data import</div>
+    </div>
+    <div class="d-caption">3 human actors (Employee, Manager, HR Admin) interact with the platform. 3 external systems (Claude API, SMTP, HR CSV) are called by the platform.</div>
+  </div>
+</section>
+<!-- ═══ D2 THREE-TIER ARCHITECTURE ═══ -->
+<section class="section" id="d2">
+  <div class="s-hdr"><span class="s-num">§ 04</span><h2 class="s-title">D2 · Three-Tier Application Architecture</h2></div>
+  <p>RhythmFlex AI uses a classic three-tier architecture: Presentation, Application, and Data layers. Each tier is a separate Docker service and communicates only with the tier directly below it.</p>
+  <div class="dbox">
+    <div class="d-bar"><span>Three-Tier Architecture — Internal View</span><span class="d-badge">Level 1 · Architecture</span></div>
+    <div class="d-body">
+<svg width="100%" viewBox="0 0 720 520" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- ── TIER 1: PRESENTATION ── -->
+<rect x="40" y="20" width="640" height="116" rx="12" fill="#e8f0fe" stroke="#4f8ef7" stroke-width="1.5"/>
+<text x="64" y="46" font-family="DM Mono,monospace" font-size="10" fill="#4f8ef7" letter-spacing="0.08em">TIER 1 · PRESENTATION LAYER</text>
+<text x="64" y="62" font-family="DM Serif Display,serif" font-size="14" fill="#1a3a7a">React SPA · port 3000 · served by nginx</text>
+<!-- 5 page boxes -->
+<rect x="56" y="72" width="106" height="50" rx="7" fill="white" stroke="#b8d0fb" stroke-width="1"/>
+<text x="109" y="95" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#1e293b">Request Wizard</text>
+<text x="109" y="110" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#64748b">4-step guided form</text>
+<rect x="172" y="72" width="106" height="50" rx="7" fill="white" stroke="#b8d0fb" stroke-width="1"/>
+<text x="225" y="95" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#1e293b">My Requests</text>
+<text x="225" y="110" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#64748b">Status tracker</text>
+<rect x="288" y="72" width="106" height="50" rx="7" fill="white" stroke="#b8d0fb" stroke-width="1"/>
+<text x="341" y="95" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#1e293b">Manager Inbox</text>
+<text x="341" y="110" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#64748b">Approval queue</text>
+<rect x="404" y="72" width="106" height="50" rx="7" fill="white" stroke="#b8d0fb" stroke-width="1"/>
+<text x="457" y="95" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#1e293b">Analytics</text>
+<text x="457" y="110" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#64748b">Fairness Radar</text>
+<rect x="520" y="72" width="146" height="50" rx="7" fill="white" stroke="#b8d0fb" stroke-width="1"/>
+<text x="593" y="95" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#1e293b">Policy Library</text>
+<text x="593" y="110" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#64748b">HR policy browser</text>
+
+<!-- Arrow down T1->T2 -->
+<text x="360" y="156" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#64748b">REST API · JSON · JWT Bearer · port 8000</text>
+<line x1="360" y1="136" x2="360" y2="166" stroke="#4f8ef7" stroke-width="1.5" marker-end="url(#arr2)" marker-start="url(#arr2)"/>
+
+<!-- ── TIER 2: APPLICATION ── -->
+<rect x="40" y="170" width="640" height="168" rx="12" fill="#e0f5f3" stroke="#0d9488" stroke-width="1.5"/>
+<text x="64" y="196" font-family="DM Mono,monospace" font-size="10" fill="#0d9488" letter-spacing="0.08em">TIER 2 · APPLICATION LAYER</text>
+<text x="64" y="212" font-family="DM Serif Display,serif" font-size="14" fill="#0a4a44">FastAPI Backend · Python 3.11 · Uvicorn · port 8000</text>
+
+<!-- Routers row -->
+<text x="64" y="232" font-family="DM Mono,monospace" font-size="9" fill="#0d9488" opacity="0.7">ROUTERS</text>
+<rect x="56" y="238" width="80" height="28" rx="5" fill="white" stroke="#99d6cf" stroke-width="0.8"/>
+<text x="96" y="257" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">auth.py</text>
+<rect x="144" y="238" width="80" height="28" rx="5" fill="white" stroke="#99d6cf" stroke-width="0.8"/>
+<text x="184" y="257" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">requests.py</text>
+<rect x="232" y="238" width="80" height="28" rx="5" fill="white" stroke="#99d6cf" stroke-width="0.8"/>
+<text x="272" y="257" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">approvals.py</text>
+<rect x="320" y="238" width="80" height="28" rx="5" fill="white" stroke="#99d6cf" stroke-width="0.8"/>
+<text x="360" y="257" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">analytics.py</text>
+<rect x="408" y="238" width="80" height="28" rx="5" fill="white" stroke="#99d6cf" stroke-width="0.8"/>
+<text x="448" y="257" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">policies.py</text>
+<rect x="496" y="238" width="80" height="28" rx="5" fill="white" stroke="#99d6cf" stroke-width="0.8"/>
+<text x="536" y="257" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">outcomes.py</text>
+<rect x="584" y="238" width="80" height="28" rx="5" fill="white" stroke="#99d6cf" stroke-width="0.8"/>
+<text x="624" y="257" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">users.py</text>
+
+<!-- Services row -->
+<text x="64" y="282" font-family="DM Mono,monospace" font-size="9" fill="#0d9488" opacity="0.7">SERVICES</text>
+<rect x="56" y="288" width="140" height="36" rx="5" fill="#d1fae5" stroke="#6ee7b7" stroke-width="0.8"/>
+<text x="126" y="306" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#065f46">AI Service</text>
+<text x="126" y="318" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#047857">LangChain + Claude API</text>
+<rect x="204" y="288" width="140" height="36" rx="5" fill="#fef3c7" stroke="#fcd34d" stroke-width="0.8"/>
+<text x="274" y="306" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#92400e">Workflow Service</text>
+<text x="274" y="318" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#b45309">Routing + SLA</text>
+<rect x="352" y="288" width="140" height="36" rx="5" fill="#f0ebff" stroke="#c4b5fd" stroke-width="0.8"/>
+<text x="422" y="306" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#3d1a8a">Policy Service</text>
+<text x="422" y="318" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#5b21b6">Semantic matching</text>
+<rect x="500" y="288" width="168" height="36" rx="5" fill="#ffeef2" stroke="#fca5a5" stroke-width="0.8"/>
+<text x="584" y="306" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#7a0a28">Notification Service</text>
+<text x="584" y="318" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#be123c">Email + in-app</text>
+
+<!-- Arrow down T2->T3 -->
+<text x="360" y="358" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#64748b">SQLAlchemy ORM · port 5432 · Redis port 6379</text>
+<line x1="360" y1="338" x2="360" y2="368" stroke="#0d9488" stroke-width="1.5" marker-end="url(#arr2)" marker-start="url(#arr2)"/>
+
+<!-- ── TIER 3: DATA ── -->
+<rect x="40" y="372" width="640" height="110" rx="12" fill="#f0ebff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="64" y="398" font-family="DM Mono,monospace" font-size="10" fill="#7c3aed" letter-spacing="0.08em">TIER 3 · DATA LAYER</text>
+<text x="64" y="414" font-family="DM Serif Display,serif" font-size="14" fill="#3d1a8a">PostgreSQL 15 · Redis 7 · Persistent Docker Volumes</text>
+<!-- DB tables -->
+<rect x="56" y="420" width="90" height="48" rx="7" fill="white" stroke="#c4b5fd" stroke-width="1"/>
+<text x="101" y="441" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">users</text>
+<text x="101" y="455" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#64748b">departments</text>
+<rect x="154" y="420" width="90" height="48" rx="7" fill="white" stroke="#c4b5fd" stroke-width="1"/>
+<text x="199" y="441" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">flex_requests</text>
+<text x="199" y="455" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#64748b">approvals</text>
+<rect x="252" y="420" width="90" height="48" rx="7" fill="white" stroke="#c4b5fd" stroke-width="1"/>
+<text x="297" y="441" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">policies</text>
+<text x="297" y="455" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#64748b">request_policies</text>
+<rect x="350" y="420" width="90" height="48" rx="7" fill="white" stroke="#c4b5fd" stroke-width="1"/>
+<text x="395" y="441" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">outcomes</text>
+<text x="395" y="455" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#64748b">notifications</text>
+<rect x="448" y="420" width="90" height="48" rx="7" fill="white" stroke="#c4b5fd" stroke-width="1"/>
+<text x="493" y="441" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e293b">audit_logs</text>
+<text x="493" y="455" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#64748b">harmony_scores</text>
+<!-- Redis box -->
+<rect x="546" y="420" width="118" height="48" rx="7" fill="#fef3c7" stroke="#fcd34d" stroke-width="1"/>
+<text x="605" y="441" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#92400e">Redis Cache</text>
+<text x="605" y="455" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#b45309">Sessions · AI cache</text>
+</svg>
+    </div>
+    <div class="legend">
+      <div class="li"><div class="ld" style="background:#e8f0fe;border:1px solid #4f8ef7"></div>Tier 1 · Presentation (React)</div>
+      <div class="li"><div class="ld" style="background:#e0f5f3;border:1px solid #0d9488"></div>Tier 2 · Application (FastAPI)</div>
+      <div class="li"><div class="ld" style="background:#f0ebff;border:1px solid #7c3aed"></div>Tier 3 · Data (PostgreSQL + Redis)</div>
+    </div>
+    <div class="d-caption">Each tier only communicates downward. React → FastAPI via REST/JSON over HTTP. FastAPI → PostgreSQL via SQLAlchemy ORM. FastAPI → Redis via redis-py. No direct DB access from React.</div>
+  </div>
+</section>
+<!-- ═══ D3 COMPONENT MAP ═══ -->
+<section class="section" id="d3">
+  <div class="s-hdr"><span class="s-num">§ 05</span><h2 class="s-title">D3 · Module Component Map</h2></div>
+  <p>How the 6 functional modules and the Code Quality Agent relate to each other internally — which modules call which services, and where the Claude API integrates.</p>
+  <div class="dbox">
+    <div class="d-bar"><span>Module Component Map — Internal Dependencies</span><span class="d-badge">Level 2 · Component</span></div>
+    <div class="d-body">
+<svg width="100%" viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arr3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+<!-- MODULES — left column -->
+<text x="40" y="30" font-family="DM Mono,monospace" font-size="10" fill="#475569" letter-spacing="0.06em">MODULES</text>
+<!-- M1 -->
+<rect x="40" y="38" width="150" height="40" rx="8" fill="#e8f0fe" stroke="#4f8ef7" stroke-width="1.2"/>
+<text x="115" y="60" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#1a3a7a">M1 · Request Intake</text>
+<!-- M2 -->
+<rect x="40" y="90" width="150" height="40" rx="8" fill="#e0f5f3" stroke="#0d9488" stroke-width="1.2"/>
+<text x="115" y="112" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#0a4a44">M2 · AI Justification</text>
+<!-- M3 -->
+<rect x="40" y="142" width="150" height="40" rx="8" fill="#f0ebff" stroke="#7c3aed" stroke-width="1.2"/>
+<text x="115" y="164" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#3d1a8a">M3 · Approval Workflow</text>
+<!-- M4 -->
+<rect x="40" y="194" width="150" height="40" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+<text x="115" y="216" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#6b3a00">M4 · Policy Tagging</text>
+<!-- M5 -->
+<rect x="40" y="246" width="150" height="40" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="1.2"/>
+<text x="115" y="268" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#064e38">M5 · Outcome Monitor</text>
+<!-- M6 -->
+<rect x="40" y="298" width="150" height="40" rx="8" fill="#ffeef2" stroke="#e11d48" stroke-width="1.2"/>
+<text x="115" y="320" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#7a0a28">M6 · Dashboard</text>
+
+<!-- SERVICES — center -->
+<text x="290" y="30" font-family="DM Mono,monospace" font-size="10" fill="#475569" letter-spacing="0.06em">BACKEND SERVICES</text>
+<rect x="270" y="38" width="180" height="40" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="360" y="60" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#065f46">AI Service (LangChain)</text>
+<rect x="270" y="90" width="180" height="40" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+<text x="360" y="112" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#92400e">Workflow Service</text>
+<rect x="270" y="142" width="180" height="40" rx="8" fill="#f0ebff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="360" y="164" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#3d1a8a">Policy Service</text>
+<rect x="270" y="194" width="180" height="40" rx="8" fill="#ffeef2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="360" y="216" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#7a0a28">Notification Service</text>
+<rect x="270" y="246" width="180" height="40" rx="8" fill="#e8f0fe" stroke="#4f8ef7" stroke-width="1.5"/>
+<text x="360" y="268" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#1a3a7a">Analytics Service</text>
+<rect x="270" y="298" width="180" height="40" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="360" y="318" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#7c2d12">Code Quality Agent</text>
+<text x="360" y="330" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#9a3412">Streamlit · port 8501</text>
+
+<!-- EXTERNAL — right -->
+<text x="540" y="30" font-family="DM Mono,monospace" font-size="10" fill="#475569" letter-spacing="0.06em">EXTERNAL</text>
+<rect x="530" y="38" width="150" height="40" rx="8" fill="#f0ebff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="605" y="57" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#3d1a8a">Claude API</text>
+<text x="605" y="70" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#5b21b6">Anthropic · Sonnet</text>
+<rect x="530" y="98" width="150" height="40" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+<text x="605" y="120" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#7c2d12">SMTP Server</text>
+<rect x="530" y="158" width="150" height="40" rx="8" fill="#e0f5f3" stroke="#0d9488" stroke-width="1.5"/>
+<text x="605" y="178" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#0a4a44">PostgreSQL</text>
+<text x="605" y="190" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#0f766e">port 5432</text>
+<rect x="530" y="218" width="150" height="40" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+<text x="605" y="240" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#92400e">Redis Cache</text>
+<text x="605" y="252" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#b45309">port 6379</text>
+
+<!-- Arrows M→Service -->
+<line x1="190" y1="58" x2="268" y2="58" stroke="#4f8ef7" stroke-width="1" marker-end="url(#arr3)"/>
+<line x1="190" y1="110" x2="268" y2="70" stroke="#0d9488" stroke-width="1" marker-end="url(#arr3)"/>
+<line x1="190" y1="162" x2="268" y2="110" stroke="#7c3aed" stroke-width="1" marker-end="url(#arr3)"/>
+<line x1="190" y1="214" x2="268" y2="162" stroke="#d97706" stroke-width="1" marker-end="url(#arr3)"/>
+<line x1="190" y1="266" x2="268" y2="214" stroke="#059669" stroke-width="1" marker-end="url(#arr3)"/>
+<line x1="190" y1="318" x2="268" y2="266" stroke="#e11d48" stroke-width="1" marker-end="url(#arr3)"/>
+<line x1="190" y1="318" x2="268" y2="318" stroke="#ea580c" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arr3)"/>
+
+<!-- Arrows Service→External -->
+<line x1="450" y1="58" x2="528" y2="58" stroke="#059669" stroke-width="1" marker-end="url(#arr3)"/>
+<line x1="450" y1="110" x2="528" y2="118" stroke="#d97706" stroke-width="1" marker-end="url(#arr3)"/>
+<line x1="450" y1="162" x2="528" y2="178" stroke="#7c3aed" stroke-width="1" marker-end="url(#arr3)"/>
+<line x1="450" y1="214" x2="528" y2="236" stroke="#e11d48" stroke-width="1" marker-end="url(#arr3)"/>
+<line x1="450" y1="266" x2="528" y2="236" stroke="#4f8ef7" stroke-width="1" marker-end="url(#arr3)"/>
+<line x1="450" y1="314" x2="528" y2="58" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arr3)"/>
+</svg>
+    </div>
+    <div class="d-caption">Arrows show which module depends on which service. Dashed arrow = Code Quality Agent uses Claude API directly. All 6 modules share PostgreSQL and Redis through the Application layer.</div>
+  </div>
+</section>
+
+<!-- ═══ D4 AI PIPELINE ═══ -->
+<section class="section" id="d4">
+  <div class="s-hdr"><span class="s-num">§ 06</span><h2 class="s-title">D4 · AI Justification Pipeline</h2></div>
+  <p>Step-by-step flow of how the employee's informal text becomes a professionally formatted justification — including the Claude API call, policy injection, and streaming response back to the browser.</p>
+  <div class="dbox">
+    <div class="d-bar"><span>AI Justification Generation Pipeline</span><span class="d-badge">Sequence Flow</span></div>
+    <div class="d-body">
+<svg width="100%" viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arr4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Swimlane headers -->
+<rect x="0" y="0" width="180" height="40" rx="0" fill="#e8f0fe"/>
+<text x="90" y="25" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#1a3a7a">React Frontend</text>
+<rect x="182" y="0" width="175" height="40" rx="0" fill="#e0f5f3"/>
+<text x="270" y="25" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#0a4a44">FastAPI Backend</text>
+<rect x="359" y="0" width="175" height="40" rx="0" fill="#d1fae5"/>
+<text x="447" y="25" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#065f46">AI Service</text>
+<rect x="536" y="0" width="184" height="40" rx="0" fill="#f0ebff"/>
+<text x="628" y="25" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#3d1a8a">Claude API</text>
+
+<!-- Swimlane lines -->
+<line x1="180" y1="0" x2="180" y2="340" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="358" y1="0" x2="358" y2="340" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="535" y1="0" x2="535" y2="340" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="719" y1="0" x2="719" y2="340" stroke="#e2e8f0" stroke-width="1"/>
+
+<!-- Steps -->
+<!-- Step 1 -->
+<rect x="10" y="54" width="160" height="32" rx="6" fill="#4f8ef7"/>
+<text x="90" y="74" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="white">1. Employee types reason</text>
+<line x1="170" y1="70" x2="188" y2="70" stroke="#4f8ef7" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+<!-- Step 2 -->
+<rect x="192" y="54" width="154" height="32" rx="6" fill="#0d9488"/>
+<text x="269" y="70" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="white">2. POST /generate-justification</text>
+<line x1="346" y1="70" x2="364" y2="70" stroke="#0d9488" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+<!-- Step 3 -->
+<rect x="369" y="54" width="155" height="32" rx="6" fill="#059669"/>
+<text x="447" y="70" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="white">3. Fetch matching policies</text>
+<text x="447" y="106" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#065f46">Policy DB query</text>
+<line x1="447" y1="86" x2="447" y2="114" stroke="#059669" stroke-width="1.2" stroke-dasharray="3 2"/>
+
+<!-- Step 4 -->
+<rect x="369" y="118" width="155" height="32" rx="6" fill="#059669"/>
+<text x="447" y="138" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="white">4. Build prompt with context</text>
+<line x1="524" y1="134" x2="541" y2="134" stroke="#059669" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+<!-- Step 5 -->
+<rect x="546" y="118" width="162" height="32" rx="6" fill="#7c3aed"/>
+<text x="627" y="134" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="white">5. Prompt: informal + policies</text>
+
+<!-- Step 6 -->
+<rect x="546" y="168" width="162" height="32" rx="6" fill="#7c3aed" opacity="0.7"/>
+<text x="627" y="188" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="white">6. Generate justification</text>
+<text x="627" y="200" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#c4b5fd">streaming tokens</text>
+<line x1="627" y1="150" x2="627" y2="166" stroke="#7c3aed" stroke-width="1.2" stroke-dasharray="3 2"/>
+<line x1="541" y1="184" x2="524" y2="184" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+<!-- Step 7 -->
+<rect x="369" y="168" width="155" height="32" rx="6" fill="#059669" opacity="0.8"/>
+<text x="447" y="188" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="white">7. Parse + structure JSON</text>
+<line x1="369" y1="184" x2="351" y2="184" stroke="#0d9488" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+<!-- Step 8 -->
+<rect x="192" y="168" width="154" height="32" rx="6" fill="#0d9488" opacity="0.8"/>
+<text x="269" y="188" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="white">8. Return stream response</text>
+<line x1="192" y1="184" x2="174" y2="184" stroke="#0d9488" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+<!-- Step 9 -->
+<rect x="10" y="168" width="160" height="32" rx="6" fill="#4f8ef7" opacity="0.8"/>
+<text x="90" y="188" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="white">9. Render live in editor</text>
+
+<!-- Step 10 -->
+<rect x="10" y="222" width="160" height="32" rx="6" fill="#1a3a7a"/>
+<text x="90" y="242" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="white">10. Employee reviews + edits</text>
+<line x1="170" y1="238" x2="188" y2="238" stroke="#1a3a7a" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+<!-- Step 11 -->
+<rect x="192" y="222" width="154" height="32" rx="6" fill="#085041"/>
+<text x="269" y="242" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="white">11. Save both versions</text>
+<text x="269" y="276" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#0f766e">informal + final to DB</text>
+
+<!-- Approval score -->
+<rect x="10" y="292" width="160" height="32" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+<text x="90" y="308" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#6b3a00">★ Approval score shown</text>
+<text x="90" y="320" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#92400e">Low / Medium / High</text>
+<rect x="192" y="292" width="154" height="32" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+<text x="269" y="308" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#6b3a00">AI Negotiation Coach</text>
+<text x="269" y="320" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#92400e">predict from history</text>
+</svg>
+    </div>
+    <div class="d-caption">Steps 1–9 take under 10 seconds. The Claude API call uses streaming so the employee sees text appear in real-time. Both the original informal text and the final edited justification are persisted in PostgreSQL for audit compliance.</div>
+  </div>
+</section>
+<!-- ═══ D5 APPROVAL WORKFLOW ═══ -->
+<section class="section" id="d5">
+  <div class="s-hdr"><span class="s-num">§ 07</span><h2 class="s-title">D5 · Approval Workflow State Machine</h2></div>
+  <p>Complete state machine showing all possible request statuses, transitions, actors who trigger each transition, and SLA escalation paths. Every transition is logged in the immutable audit log.</p>
+  <div class="dbox">
+    <div class="d-bar"><span>Approval Workflow — State Machine</span><span class="d-badge">Workflow Diagram</span></div>
+    <div class="d-body">
+<svg width="100%" viewBox="0 0 720 460" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arr5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- START -->
+<circle cx="60" cy="60" r="18" fill="#0f1c2e"/>
+<text x="60" y="65" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="white">Start</text>
+
+<!-- DRAFT -->
+<rect x="108" y="40" width="96" height="40" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+<text x="156" y="64" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#334155">DRAFT</text>
+<line x1="78" y1="60" x2="106" y2="60" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr5)"/>
+
+<!-- SUBMITTED -->
+<rect x="270" y="40" width="120" height="40" rx="8" fill="#e8f0fe" stroke="#4f8ef7" stroke-width="1.5"/>
+<text x="330" y="64" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#1a3a7a">SUBMITTED</text>
+<line x1="204" y1="60" x2="268" y2="60" stroke="#4f8ef7" stroke-width="1.5" marker-end="url(#arr5)"/>
+<text x="236" y="53" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#4f8ef7">Employee submits</text>
+
+<!-- UNDER REVIEW -->
+<rect x="460" y="40" width="130" height="40" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+<text x="525" y="64" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#6b3a00">UNDER REVIEW</text>
+<line x1="390" y1="60" x2="458" y2="60" stroke="#d97706" stroke-width="1.5" marker-end="url(#arr5)"/>
+<text x="424" y="53" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#d97706">Auto-routed</text>
+
+<!-- PENDING INFO -->
+<rect x="460" y="140" width="130" height="40" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+<text x="525" y="164" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#7c2d12">PENDING INFO</text>
+<line x1="525" y1="80" x2="525" y2="138" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arr5)"/>
+<text x="538" y="112" font-family="DM Sans,sans-serif" font-size="9" fill="#ea580c">Manager requests info</text>
+<!-- Back to under review -->
+<path d="M460 160 Q420 160 420 80 Q420 60 458 60" fill="none" stroke="#ea580c" stroke-width="1.2" stroke-dasharray="4 2" marker-end="url(#arr5)"/>
+<text x="402" y="115" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#ea580c">Employee responds</text>
+
+<!-- ESCALATED -->
+<rect x="270" y="140" width="130" height="40" rx="8" fill="#ffeef2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="335" y="164" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#7a0a28">ESCALATED</text>
+<line x1="460" y1="80" x2="400" y2="140" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr5)"/>
+<text x="430" y="108" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#e11d48">SLA breach T+5</text>
+
+<!-- APPROVED -->
+<rect x="108" y="240" width="120" height="44" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+<text x="168" y="264" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#065f46">✓ APPROVED</text>
+<!-- from under review -->
+<path d="M525 80 L525 290 L230 290 L230 262" fill="none" stroke="#059669" stroke-width="1.5" marker-end="url(#arr5)"/>
+<text x="400" y="304" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#059669">Manager approves</text>
+<!-- from escalated -->
+<line x1="270" y1="165" x2="228" y2="242" stroke="#059669" stroke-width="1.2" stroke-dasharray="4 2" marker-end="url(#arr5)"/>
+<text x="236" y="205" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#059669">HR approves</text>
+
+<!-- APPROVED W/ CONDITIONS -->
+<rect x="300" y="240" width="160" height="44" rx="8" fill="#e0f5f3" stroke="#0d9488" stroke-width="1.5"/>
+<text x="380" y="260" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#0a4a44">APPROVED</text>
+<text x="380" y="275" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#0a4a44">with Conditions</text>
+<line x1="525" y1="80" x2="380" y2="238" stroke="#0d9488" stroke-width="1.2" marker-end="url(#arr5)"/>
+
+<!-- REJECTED -->
+<rect x="530" y="240" width="120" height="44" rx="8" fill="#ffeef2" stroke="#e11d48" stroke-width="2"/>
+<text x="590" y="266" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#7a0a28">✗ REJECTED</text>
+<path d="M525 80 L590 80 L590 238" fill="none" stroke="#e11d48" stroke-width="1.5" marker-end="url(#arr5)"/>
+<text x="605" y="160" font-family="DM Sans,sans-serif" font-size="9" fill="#e11d48">Manager rejects</text>
+
+<!-- WITHDRAWN -->
+<rect x="108" y="140" width="100" height="40" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+<text x="158" y="164" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#334155">WITHDRAWN</text>
+<line x1="330" y1="80" x2="206" y2="140" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4 2" marker-end="url(#arr5)"/>
+<text x="248" y="102" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#64748b">Employee withdraws</text>
+
+<!-- EXPIRED -->
+<rect x="108" y="330" width="100" height="40" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="158" y="354" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#64748b">EXPIRED</text>
+<line x1="168" y1="284" x2="158" y2="328" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4 2" marker-end="url(#arr5)"/>
+<text x="145" y="310" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#64748b">End date passes</text>
+
+<!-- OUTCOME JOURNAL -->
+<rect x="300" y="330" width="360" height="40" rx="8" fill="#f0ebff" stroke="#7c3aed" stroke-width="1" stroke-dasharray="5 3"/>
+<text x="480" y="354" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#3d1a8a">→ Outcome Journal + AI Improvement Suggestions generated</text>
+<line x1="168" y1="284" x2="420" y2="328" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arr5)"/>
+<line x1="590" y1="284" x2="540" y2="328" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arr5)"/>
+
+<!-- AUDIT LOG label -->
+<rect x="40" y="410" width="640" height="32" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="360" y="430" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#475569">🔒 Every state transition logged to immutable audit_logs table · actor · timestamp · old_status · new_status · comments</text>
+</svg>
+    </div>
+    <div class="legend">
+      <div class="li"><div class="ld" style="background:#d1fae5;border:2px solid #059669"></div>Terminal: Approved</div>
+      <div class="li"><div class="ld" style="background:#ffeef2;border:2px solid #e11d48"></div>Terminal: Rejected</div>
+      <div class="li"><div class="ld" style="background:#fef3c7;border:1px solid #d97706"></div>Active: Under Review</div>
+      <div class="li"><div class="ld" style="background:#ffeef2;border:1px dashed #e11d48"></div>Escalated (SLA breach)</div>
+      <div class="li"><div class="ld" style="background:#f1f5f9;border:1px solid #94a3b8"></div>Inactive states</div>
+    </div>
+  </div>
+</section>
+<!-- ═══ D6 DEPLOYMENT ═══ -->
+<section class="section" id="d6">
+  <div class="s-hdr"><span class="s-num">§ 08</span><h2 class="s-title">D6 · Local Deployment Topology</h2></div>
+  <p>All six services run in Docker containers on the local machine. Docker Compose manages service discovery, networking, and volume persistence. A single command — <code>docker-compose up --build</code> — starts the full stack.</p>
+  <div class="dbox">
+    <div class="d-bar"><span>Docker Compose Deployment — Local Machine</span><span class="d-badge">Deployment View</span></div>
+    <div class="d-body">
+<svg width="100%" viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arr6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- HOST MACHINE boundary -->
+<rect x="20" y="20" width="680" height="300" rx="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="8 4"/>
+<text x="40" y="42" font-family="DM Mono,monospace" font-size="10" fill="#64748b" letter-spacing="0.06em">LOCAL MACHINE · Docker Compose Network: lifeloom_net</text>
+
+<!-- BROWSER (outside) -->
+<rect x="0" y="140" width="0" height="0"/>
+<text x="36" y="82" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#0f1c2e">Browser</text>
+<text x="36" y="96" font-family="DM Mono,monospace" font-size="10" fill="#475569">localhost:3000</text>
+
+<!-- Service boxes in 2 rows of 3 -->
+<!-- ROW 1 -->
+<!-- nginx + React -->
+<rect x="36" y="108" width="172" height="70" rx="10" fill="#e8f0fe" stroke="#4f8ef7" stroke-width="1.5"/>
+<text x="50" y="127" font-family="DM Mono,monospace" font-size="9" fill="#4f8ef7">frontend</text>
+<text x="122" y="145" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#1a3a7a">nginx + React</text>
+<text x="122" y="162" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#3b5bab">port: 3000</text>
+
+<!-- FastAPI -->
+<rect x="228" y="108" width="172" height="70" rx="10" fill="#e0f5f3" stroke="#0d9488" stroke-width="1.5"/>
+<text x="242" y="127" font-family="DM Mono,monospace" font-size="9" fill="#0d9488">backend</text>
+<text x="314" y="145" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#0a4a44">FastAPI + Uvicorn</text>
+<text x="314" y="162" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#0f766e">port: 8000</text>
+
+<!-- PostgreSQL -->
+<rect x="420" y="108" width="172" height="70" rx="10" fill="#f0ebff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="434" y="127" font-family="DM Mono,monospace" font-size="9" fill="#7c3aed">db</text>
+<text x="506" y="145" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#3d1a8a">PostgreSQL 15</text>
+<text x="506" y="162" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#5b21b6">port: 5432</text>
+
+<!-- ROW 2 -->
+<!-- Redis -->
+<rect x="36" y="214" width="172" height="70" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+<text x="50" y="233" font-family="DM Mono,monospace" font-size="9" fill="#d97706">redis</text>
+<text x="122" y="251" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#6b3a00">Redis 7</text>
+<text x="122" y="268" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#b45309">port: 6379</text>
+
+<!-- Streamlit -->
+<rect x="228" y="214" width="172" height="70" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+<text x="242" y="233" font-family="DM Mono,monospace" font-size="9" fill="#ea580c">ai-agent</text>
+<text x="314" y="251" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#7c2d12">Streamlit Agent</text>
+<text x="314" y="268" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#9a3412">port: 8501</text>
+
+<!-- pgAdmin -->
+<rect x="420" y="214" width="172" height="70" rx="10" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="434" y="233" font-family="DM Mono,monospace" font-size="9" fill="#64748b">pgadmin (dev)</text>
+<text x="506" y="251" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#334155">pgAdmin 4</text>
+<text x="506" y="268" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#475569">port: 5050</text>
+
+<!-- Arrows between services -->
+<line x1="208" y1="143" x2="226" y2="143" stroke="#4f8ef7" stroke-width="1.5" marker-end="url(#arr6)" marker-start="url(#arr6)"/>
+<text x="217" y="137" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="#64748b">REST</text>
+<line x1="400" y1="143" x2="418" y2="143" stroke="#0d9488" stroke-width="1.5" marker-end="url(#arr6)"/>
+<text x="409" y="137" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="#64748b">ORM</text>
+<line x1="314" y1="178" x2="122" y2="212" stroke="#d97706" stroke-width="1.2" marker-end="url(#arr6)"/>
+<text x="204" y="192" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="#d97706">cache</text>
+<line x1="314" y1="178" x2="314" y2="212" stroke="#ea580c" stroke-width="1.2" stroke-dasharray="4 2"/>
+<text x="326" y="198" font-family="DM Sans,sans-serif" font-size="8" fill="#ea580c">shares API</text>
+
+<!-- Volumes -->
+<rect x="36" y="302" width="640" height="12" rx="4" fill="#e2e8f0"/>
+<text x="356" y="313" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#475569">📦 Volumes: postgres_data · redis_data · uploads_data (persisted across container restarts)</text>
+
+<!-- External API label -->
+<text x="612" y="80" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#7c3aed">Claude API</text>
+<text x="612" y="93" font-family="DM Mono,monospace" font-size="9" fill="#64748b">api.anthropic.com</text>
+<line x1="400" y1="143" x2="604" y2="86" stroke="#7c3aed" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr6)"/>
+</svg>
+    </div>
+    <div class="legend">
+      <div class="li"><div class="ld" style="background:#e8f0fe;border:1px solid #4f8ef7"></div>frontend · :3000</div>
+      <div class="li"><div class="ld" style="background:#e0f5f3;border:1px solid #0d9488"></div>backend · :8000</div>
+      <div class="li"><div class="ld" style="background:#f0ebff;border:1px solid #7c3aed"></div>db · :5432</div>
+      <div class="li"><div class="ld" style="background:#fef3c7;border:1px solid #d97706"></div>redis · :6379</div>
+      <div class="li"><div class="ld" style="background:#fff7ed;border:1px solid #ea580c"></div>ai-agent · :8501</div>
+      <div class="li"><div class="ld" style="background:#f1f5f9;border:1px dashed #94a3b8"></div>pgadmin · :5050 (dev only)</div>
+    </div>
+    <div class="d-caption">Start: <code>docker-compose up --build</code> · App: localhost:3000 · API Docs: localhost:8000/docs · Agent: localhost:8501 · DB GUI: localhost:5050</div>
+  </div>
+</section>
+
+<!-- ═══ D7 SECURITY & AUTH ═══ -->
+<section class="section" id="d7">
+  <div class="s-hdr"><span class="s-num">§ 09</span><h2 class="s-title">D7 · Security &amp; Authentication Flow</h2></div>
+  <p>JWT-based authentication with role-based access control enforced at the FastAPI layer. The Anthropic API key is environment-variable-only — it exists only inside the backend container and never reaches the browser or logs.</p>
+  <div class="dbox">
+    <div class="d-bar"><span>Authentication &amp; Security Flow</span><span class="d-badge">Security View</span></div>
+    <div class="d-body">
+<svg width="100%" viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arr7" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Step 1: Login -->
+<rect x="20" y="30" width="130" height="50" rx="8" fill="#e8f0fe" stroke="#4f8ef7" stroke-width="1.5"/>
+<text x="85" y="52" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#1a3a7a">1. Login</text>
+<text x="85" y="68" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#3b5bab">email + password</text>
+<line x1="150" y1="55" x2="198" y2="55" stroke="#4f8ef7" stroke-width="1.5" marker-end="url(#arr7)"/>
+
+<!-- Step 2: FastAPI Auth -->
+<rect x="200" y="30" width="140" height="50" rx="8" fill="#e0f5f3" stroke="#0d9488" stroke-width="1.5"/>
+<text x="270" y="52" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#0a4a44">2. Verify credentials</text>
+<text x="270" y="68" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#0f766e">bcrypt hash check · DB</text>
+<line x1="340" y1="55" x2="388" y2="55" stroke="#0d9488" stroke-width="1.5" marker-end="url(#arr7)"/>
+
+<!-- Step 3: JWT issued -->
+<rect x="390" y="30" width="140" height="50" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="460" y="52" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#065f46">3. Issue JWT</text>
+<text x="460" y="68" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#047857">access + refresh tokens</text>
+<line x1="530" y1="55" x2="578" y2="55" stroke="#059669" stroke-width="1.5" marker-end="url(#arr7)"/>
+
+<!-- Step 4: Stored in memory -->
+<rect x="580" y="30" width="120" height="50" rx="8" fill="#e8f0fe" stroke="#4f8ef7" stroke-width="1.5"/>
+<text x="640" y="52" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#1a3a7a">4. Stored</text>
+<text x="640" y="68" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#3b5bab">React memory only</text>
+
+<!-- Step 5: API call -->
+<rect x="20" y="130" width="130" height="50" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+<text x="85" y="152" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#6b3a00">5. API request</text>
+<text x="85" y="168" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#92400e">Bearer: &lt;JWT&gt; header</text>
+<line x1="150" y1="155" x2="198" y2="155" stroke="#d97706" stroke-width="1.5" marker-end="url(#arr7)"/>
+
+<!-- Step 6: Validate JWT -->
+<rect x="200" y="130" width="140" height="50" rx="8" fill="#e0f5f3" stroke="#0d9488" stroke-width="1.5"/>
+<text x="270" y="152" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#0a4a44">6. Validate JWT</text>
+<text x="270" y="168" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#0f766e">python-jose · expiry check</text>
+<line x1="340" y1="155" x2="388" y2="155" stroke="#0d9488" stroke-width="1.5" marker-end="url(#arr7)"/>
+
+<!-- Step 7: RBAC check -->
+<rect x="390" y="130" width="140" height="50" rx="8" fill="#f0ebff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="460" y="152" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#3d1a8a">7. RBAC check</text>
+<text x="460" y="168" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#5b21b6">role in [employee/manager/hr]</text>
+<line x1="530" y1="155" x2="578" y2="155" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr7)"/>
+
+<!-- Step 8: Execute -->
+<rect x="580" y="130" width="120" height="50" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="640" y="152" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#065f46">8. Execute</text>
+<text x="640" y="168" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#047857">business logic runs</text>
+
+<!-- Reject path -->
+<rect x="390" y="218" width="140" height="40" rx="8" fill="#ffeef2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="460" y="242" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#7a0a28">401 / 403 returned</text>
+<line x1="460" y1="180" x2="460" y2="216" stroke="#e11d48" stroke-width="1.2" stroke-dasharray="4 2" marker-end="url(#arr7)"/>
+<text x="475" y="202" font-family="DM Sans,sans-serif" font-size="9" fill="#e11d48">fails check</text>
+
+<!-- Security notes row -->
+<rect x="20" y="280" width="680" height="28" rx="6" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+<text x="360" y="298" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#475569">🔑 ANTHROPIC_API_KEY lives ONLY in backend .env · never in React · never in logs · TLS 1.3 on all external calls · bcrypt for passwords · AES-256 DB encryption</text>
+</svg>
+    </div>
+    <div class="d-caption">JWT access tokens expire in 8 hours. Refresh tokens in 7 days. All tokens stored in React in-memory state (never localStorage). Caregiving requests are hidden from line managers at the RBAC layer — HR Admin role only.</div>
+  </div>
+</section>
+<!-- ═══ DESIGN DECISIONS ═══ -->
+<section class="section" id="decisions">
+  <div class="s-hdr"><span class="s-num">§ 10</span><h2 class="s-title">Architectural Design Decisions</h2></div>
+  <p>Key decisions made during architecture design with rationale — documented for traceability and future reference.</p>
+  <div class="dc-grid">
+    <div class="dc"><div class="dc-id">ADR-001</div><div class="dc-t">FastAPI over Django/Flask</div><div class="dc-tx">FastAPI provides automatic OpenAPI docs, async support for streaming Claude API responses, and Pydantic v2 for type-safe data models. Critical for the AI streaming feature.</div></div>
+    <div class="dc"><div class="dc-id">ADR-002</div><div class="dc-t">PostgreSQL over MongoDB</div><div class="dc-tx">The approval workflow is a deeply relational domain (users → requests → approvals → policies). RDBMS with FK constraints and ACID guarantees is the correct choice. The brief explicitly prohibits JSON data input.</div></div>
+    <div class="dc"><div class="dc-id">ADR-003</div><div class="dc-t">Server-side Claude API calls only</div><div class="dc-tx">API key security is non-negotiable. All AI prompts are constructed server-side with policy context injected from the database. The browser only receives the generated text.</div></div>
+    <div class="dc"><div class="dc-id">ADR-004</div><div class="dc-t">Separate Streamlit service for Code Quality Agent</div><div class="dc-tx">The brief mandates Streamlit/Gradio for the Code Quality Checker but forbids it for the main UI. Isolating it as a separate Docker service satisfies both requirements cleanly.</div></div>
+    <div class="dc"><div class="dc-id">ADR-005</div><div class="dc-t">Redis for sessions, not JWT blacklist</div><div class="dc-tx">Redis is used to cache AI responses (reduces repeat API costs) and for session data. Short JWT expiry (8h) avoids the need for a token blacklist for MVP scope.</div></div>
+    <div class="dc"><div class="dc-id">ADR-006</div><div class="dc-t">Docker Compose over Kubernetes</div><div class="dc-tx">The brief specifies local deployment. Docker Compose provides the simplest reproducible environment with a single command. Kubernetes would be the cloud migration path.</div></div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span>DOC-ARCH-002 · RhythmFlex AI — Architecture Document</span>
+  <span>Version 1.0.0 · 13 March 2026 · TCS Internal · CONFIDENTIAL</span>
+</div>
+</body>
+</html>
